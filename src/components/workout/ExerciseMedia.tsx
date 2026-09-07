@@ -122,12 +122,7 @@ async function fetchExerciseFromApi(
   );
 
   url.searchParams.set("name", searchName.trim());
-
-  console.log("=================================");
-  console.log("ExerciseDB");
-  console.log("Busca:", searchName);
-  console.log("URL:", url.toString());
-  console.log("=================================");
+  url.searchParams.set("limit", 1000);
 
   const response = await fetch(url.toString(), {
     method: "GET",

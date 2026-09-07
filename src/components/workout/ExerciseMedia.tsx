@@ -7,10 +7,16 @@ import type { Exercise } from "@/lib/workouts";
  * Extrai o ID de um vídeo do YouTube a partir de diversos formatos de URL
  */
 function getYouTubeId(url?: string): string | null {
-  if (!url) return null;
+  if (!url || typeof url !== "string") return null;
+
+  const trimmed = url.trim();
+  if (trimmed.length === 11 && !trimmed.includes("/")) {
+    return trimmed;
+  }
+
   const regExp =
-    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = trimmed.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
 }
 
@@ -30,8 +36,8 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  // Aceita tanto exercise.youtubeUrl quanto exercise.media.video
-  const rawUrl = exercise.youtubeUrl || exercise.media?.video;
+  // Lê a URL configurada em exercise.media.video ou exercise.youtubeUrl
+  const rawUrl = exercise.media?.video || (exercise as any).youtubeUrl;
   const videoId = getYouTubeId(rawUrl);
 
   // Capa estática do vídeo do YouTube
@@ -100,9 +106,10 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
             <div className="aspect-video w-full overflow-hidden bg-black">
               {videoId ? (
                 <iframe
-                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&enablejsapi=1`}
+                  key={videoId}
+                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1`}
                   title={`Execução: ${exercise.name}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="h-full w-full border-0"
                 />
@@ -130,9 +137,9 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
                   href={`https://www.youtube.com/watch?v=${videoId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <span>Não está carregando? Abrir no YouTube</span>
+                  <span>Abrir diretamente no YouTube</span>
                   <ExternalLink size={14} />
                 </a>
               )}

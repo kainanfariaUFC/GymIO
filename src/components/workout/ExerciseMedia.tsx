@@ -430,69 +430,10 @@ export function ExerciseMedia({
                 />
               )}
             </div>
-
-            {/* Informações */}
             <div className="space-y-4 px-5 py-4">
               <p className="text-sm text-muted-foreground">
                 {exercise.sets} · {exercise.muscle}
               </p>
-
-              {apiExercise?.equipments &&
-              apiExercise.equipments.length > 0 ? (
-                <div>
-                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                    Equipamento
-                  </p>
-
-                  <p className="text-sm text-foreground">
-                    {apiExercise.equipments.join(", ")}
-                  </p>
-                </div>
-              ) : null}
-
-              {apiExercise?.targetMuscles &&
-              apiExercise.targetMuscles.length > 0 ? (
-                <div>
-                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                    Músculo alvo
-                  </p>
-
-                  <p className="text-sm text-foreground">
-                    {apiExercise.targetMuscles.join(", ")}
-                  </p>
-                </div>
-              ) : null}
-
-              {apiExercise?.instructions &&
-              apiExercise.instructions.length > 0 ? (
-                <div>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                    Como executar
-                  </p>
-
-                  <ol className="space-y-2">
-                    {apiExercise.instructions.map(
-                      (instruction, index) => (
-                        <li
-                          key={`${apiExercise.exerciseId}-step-${index}`}
-                          className="flex gap-2 text-sm leading-relaxed text-foreground"
-                        >
-                          <span className="shrink-0 font-bold text-muted-foreground">
-                            {index + 1}.
-                          </span>
-
-                          <span>
-                            {instruction.replace(
-                              /^Step:\d+\s*/i,
-                              "",
-                            )}
-                          </span>
-                        </li>
-                      ),
-                    )}
-                  </ol>
-                </div>
-              ) : null}
             </div>
           </div>
         </div>

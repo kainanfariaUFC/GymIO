@@ -79,7 +79,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "3×10–12",
             muscle: "Ombros",
             media: {
-              video: "https://www.youtube.com/shorts/5I7ogOjvdnc",
+              video: "https://www.youtube.com/shorts/5I7ogOjvdnc", 
             },
           },
           {

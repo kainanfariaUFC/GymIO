@@ -1,48 +1,52 @@
-import { Loader2, Play, X } from "lucide-react";
+import { Play, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { Exercise } from "@/lib/workouts";
 
-type ExerciseDbResult = {
-  exerciseId: string;
-  name: string;
-  gifUrl?: string;
-  bodyParts?: string[];
-  equipments?: string[];
-  targetMuscles?: string[];
-  secondaryMuscles?: string[];
-  instructions?: string[];
-};
-
-type ExerciseDbResponse = {
-  success: boolean;
-  data: ExerciseDbResult[];
-  meta?: {
-    total: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-    nextCursor?: string;
-  };
-};
+/**
+ * Função utilitária para extrair o ID de um vídeo do YouTube
+ * Suporta formatos: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+ */
+function getYouTubeId(url?: string): string | null {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+}
 
 function MediaFrame({
   exercise,
   large,
-  apiExercise,
 }: {
   exercise: Exercise;
   large?: boolean;
-  apiExercise?: ExerciseDbResult | null;
 }) {
-  const media = exercise.media;
+  // Supondo que você salve o link/ID do youtube em exercise.youtubeUrl ou exercise.media.video
+  const youtubeUrl = exercise.youtubeUrl || exercise.media?.video;
+  const videoId = getYouTubeId(youtubeUrl);
 
   /*
-   * 1. Primeiro usamos o GIF encontrado na ExerciseDB.
+   * 1. Vídeo do YouTube (Embed)
    */
-  if (apiExercise?.gifUrl) {
+  if (videoId) {
+    return (
+      <iframe
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`}
+        title={`Execução: ${exercise.name}`}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className={`h-full w-full border-0 ${large ? "" : "rounded-xl"}`}
+      />
+    );
+  }
+
+  /*
+   * 2. Imagem local/fallback
+   */
+  if (exercise.media?.image) {
     return (
       <img
-        src={apiExercise.gifUrl}
+        src={exercise.media.image}
         alt={`Execução correta: ${exercise.name}`}
         loading="lazy"
         decoding="async"
@@ -54,44 +58,7 @@ function MediaFrame({
   }
 
   /*
-   * 2. Se não houver GIF da API, usamos o vídeo local.
-   */
-  if (media?.video) {
-    return (
-      <video
-        src={media.video}
-        poster={media.image}
-        muted
-        loop
-        autoPlay
-        playsInline
-        preload="none"
-        className={`h-full w-full object-cover ${
-          large ? "" : "rounded-xl"
-        }`}
-      />
-    );
-  }
-
-  /*
-   * 3. Depois tentamos a imagem local.
-   */
-  if (media?.image) {
-    return (
-      <img
-        src={media.image}
-        alt={`Execução correta: ${exercise.name}`}
-        loading="lazy"
-        decoding="async"
-        className={`h-full w-full object-cover ${
-          large ? "" : "rounded-xl"
-        }`}
-      />
-    );
-  }
-
-  /*
-   * 4. Sem mídia.
+   * 3. Sem mídia
    */
   return (
     <div className="grid h-full w-full place-items-center bg-muted px-3 text-center">
@@ -104,150 +71,15 @@ function MediaFrame({
   );
 }
 
-/**
- * Busca o exercício na ExerciseDB.
- *
- * IMPORTANTE:
- * Nunca usamos result.data[0].
- *
- * Se não encontrarmos uma correspondência,
- * retornamos null para evitar mostrar a mídia
- * de outro exercício.
- */
-async function fetchExerciseFromApi(
-  searchName: string,
-): Promise<ExerciseDbResult | null> {
-  const url = new URL(
-    "https://oss.exercisedb.dev/api/v1/exercises",
-  );
-
-  url.searchParams.set("name", searchName.trim());
-  url.searchParams.set("limit", 1000);
-
-  const response = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `ExerciseDB API retornou ${response.status}`,
-    );
-  }
-
-  const result: ExerciseDbResponse = await response.json();
-
-  console.log(
-    "Resultados encontrados:",
-    result.data?.map((item) => ({
-      id: item.exerciseId,
-      name: item.name,
-    })),
-  );
-
-  if (!result.success || !Array.isArray(result.data)) {
-    return null;
-  }
-
-  /*
-   * Normaliza o texto para comparação.
-   */
-  const normalizedSearch = searchName
-    .trim()
-    .toLowerCase();
-
-  /*
-   * PRIMEIRA TENTATIVA:
-   * correspondência exata.
-   *
-   * Exemplo:
-   *
-   * search:
-   * "lat pulldown"
-   *
-   * resultado:
-   * "lat pulldown"
-   */
-  const exactMatch = result.data.find(
-    (item) =>
-      item.name.trim().toLowerCase() === normalizedSearch,
-  );
-
-  if (exactMatch) {
-    console.log(
-      "Correspondência exata:",
-      exactMatch.name,
-    );
-
-    return exactMatch;
-  }
-
-  /*
-   * SEGUNDA TENTATIVA:
-   * procura correspondência parcial.
-   *
-   * Isso ajuda quando a API retorna alguma
-   * variação do nome.
-   */
-  const partialMatch = result.data.find((item) => {
-    const normalizedApiName = item.name
-      .trim()
-      .toLowerCase();
-
-    return (
-      normalizedApiName.includes(normalizedSearch) ||
-      normalizedSearch.includes(normalizedApiName)
-    );
-  });
-
-  if (partialMatch) {
-    console.log(
-      "Correspondência parcial:",
-      partialMatch.name,
-    );
-
-    return partialMatch;
-  }
-
-  /*
-   * IMPORTANTE:
-   *
-   * NÃO fazemos:
-   *
-   * return result.data[0];
-   *
-   * Se não encontramos o exercício,
-   * retornamos null.
-   */
-  console.warn(
-    "Nenhuma correspondência encontrada para:",
-    searchName,
-  );
-
-  return null;
-}
-
 export function ExerciseMedia({
   exercise,
 }: {
   exercise: Exercise;
 }) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const [apiExercise, setApiExercise] =
-    useState<ExerciseDbResult | null>(null);
-
-  const [apiError, setApiError] =
-    useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!open) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -256,95 +88,11 @@ export function ExerciseMedia({
     };
 
     window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      window.removeEventListener(
-        "keydown",
-        onKeyDown,
-      );
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  /**
-   * Abre o modal e faz uma nova busca.
-   */
-  const handleOpen = async () => {
-    /*
-     * IMPORTANTE:
-     *
-     * `apiName` é o nome específico usado
-     * pela ExerciseDB.
-     *
-     * Exemplo:
-     *
-     * name:
-     * "Puxada Alta Frontal na Polia"
-     *
-     * apiName:
-     * "lat pulldown"
-     */
-    const searchName = (
-      exercise.apiName || exercise.name
-    ).trim();
-
-    console.log("=================================");
-    console.log("Exercício clicado:", exercise.name);
-    console.log("Busca na API:", searchName);
-    console.log("ID:", exercise.id);
-    console.log("=================================");
-
-    /*
-     * Abre o modal.
-     */
-    setOpen(true);
-
-    /*
-     * Muito importante:
-     * remove o resultado anterior.
-     */
-    setApiExercise(null);
-    setApiError(null);
-    setLoading(true);
-
-    try {
-      const result =
-        await fetchExerciseFromApi(searchName);
-
-      if (!result) {
-        setApiError(
-          `Não encontramos "${exercise.name}" na ExerciseDB.`,
-        );
-
-        return;
-      }
-
-      console.log(
-        "Exercício encontrado:",
-        result.name,
-        result.exerciseId,
-      );
-
-      setApiExercise(result);
-    } catch (error) {
-      console.error(
-        "Erro ao consultar ExerciseDB:",
-        error,
-      );
-
-      setApiError(
-        "Não foi possível carregar a execução. Tente novamente.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setLoading(false);
-    setApiExercise(null);
-    setApiError(null);
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
     <>
@@ -372,9 +120,7 @@ export function ExerciseMedia({
           className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm"
         >
           <div
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
             className="w-full max-w-md overflow-hidden rounded-3xl bg-card shadow-soft"
           >
             {/* Header */}
@@ -395,36 +141,9 @@ export function ExerciseMedia({
 
             {/* Mídia */}
             <div className="aspect-video w-full overflow-hidden bg-muted">
-              {loading ? (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-muted-foreground">
-                  <Loader2
-                    size={28}
-                    aria-hidden
-                    className="animate-spin"
-                  />
-
-                  <span className="text-sm font-medium">
-                    Buscando exercício...
-                  </span>
-                </div>
-              ) : apiError ? (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center">
-                  <span className="grid h-12 w-12 place-items-center rounded-full bg-card text-muted-foreground shadow-soft">
-                    <Play size={20} aria-hidden />
-                  </span>
-
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {apiError}
-                  </p>
-                </div>
-              ) : (
-                <MediaFrame
-                  exercise={exercise}
-                  large
-                  apiExercise={apiExercise}
-                />
-              )}
+              <MediaFrame exercise={exercise} large />
             </div>
+
             <div className="space-y-4 px-5 py-4">
               <p className="text-sm text-muted-foreground">
                 {exercise.sets} · {exercise.muscle}

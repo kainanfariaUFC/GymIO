@@ -36,16 +36,14 @@ function MediaFrame({ exercise, large }: { exercise: Exercise; large?: boolean }
   return (
     <div className="grid h-full w-full place-items-center gap-2 bg-muted px-3 text-center">
       <div className="flex flex-col items-center gap-2">
-        <span className="grid h-11 w-11 place-items-center rounded-full bg-card text-muted-foreground shadow-soft">
+        <span className="grid h-11 w-11 place-items-center rounded-full bg-card text-muted-foreground shadow-soft" style="width: 30px;height: 30px;"> 
           <Play size={18} aria-hidden />
         </span>
         <span
           className={`font-semibold leading-tight text-muted-foreground ${
             large ? "text-base" : "line-clamp-2 text-xs"
           }`}
-        >
-          {large ? exercise.name : "Exemplo em breve"}
-        </span>
+        />
       </div>
     </div>
   );

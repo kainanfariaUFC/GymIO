@@ -69,7 +69,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "a-s1",
             name: "Agachamento Livre com Barra ou Halter (ou Leg Press 45°)",
-            apiName: "barbell squat",
+            apiName: "barbell low bar squat",
             sets: "4×8–10",
             muscle: "Quadríceps/Glúteos",
           },
@@ -83,7 +83,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "a-s3",
             name: "Puxada Alta Frontal na Polia",
-            apiName: "cable lat pulldown",
+            apiName: "cable bar lateral pulldown",
             sets: "4×10–12",
             muscle: "Costas",
           },
@@ -97,14 +97,14 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "a-s5",
             name: "Desenvolvimento de Ombros com Halteres",
-            apiName: "dumbbell shoulder press",
+            apiName: "lever shoulder press v. 3",
             sets: "3×10–12",
             muscle: "Ombros",
           },
           {
             id: "a-s6",
             name: "Rosca Direta no Pulley / Cabo",
-            apiName: "cable curl",
+            apiName: "barbell drag curl",
             sets: "3×12–15",
             muscle: "Bíceps",
           },
@@ -118,7 +118,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "a-s8",
             name: "Prancha Abdominal Solo",
-            apiName: "plank",
+            apiName: "front plank",
             sets: "3×45–60s",
             muscle: "Core",
           },
@@ -235,7 +235,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "b-s8",
             name: "Abdominal Infra no Banco / Paralela",
-            apiName: "lying leg raise",
+            apiName: "reverse crunch",
             sets: "3×15",
             muscle: "Core",
           },

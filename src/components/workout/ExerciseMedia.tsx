@@ -5,70 +5,12 @@ import type { Exercise } from "@/lib/workouts";
 
 /**
  * Função utilitária para extrair o ID de um vídeo do YouTube
- * Suporta formatos: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
  */
 function getYouTubeId(url?: string): string | null {
   if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
-}
-
-function MediaFrame({
-  exercise,
-  large,
-}: {
-  exercise: Exercise;
-  large?: boolean;
-}) {
-  // Supondo que você salve o link/ID do youtube em exercise.youtubeUrl ou exercise.media.video
-  const youtubeUrl = exercise.youtubeUrl || exercise.media?.video;
-  const videoId = getYouTubeId(youtubeUrl);
-
-  /*
-   * 1. Vídeo do YouTube (Embed)
-   */
-  if (videoId) {
-    return (
-      <iframe
-        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`}
-        title={`Execução: ${exercise.name}`}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className={`h-full w-full border-0 ${large ? "" : "rounded-xl"}`}
-      />
-    );
-  }
-
-  /*
-   * 2. Imagem local/fallback
-   */
-  if (exercise.media?.image) {
-    return (
-      <img
-        src={exercise.media.image}
-        alt={`Execução correta: ${exercise.name}`}
-        loading="lazy"
-        decoding="async"
-        className={`h-full w-full object-cover ${
-          large ? "" : "rounded-xl"
-        }`}
-      />
-    );
-  }
-
-  /*
-   * 3. Sem mídia
-   */
-  return (
-    <div className="grid h-full w-full place-items-center bg-muted px-3 text-center">
-      <div className="flex flex-col items-center">
-        <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-card text-muted-foreground shadow-soft">
-          <Play size={18} aria-hidden />
-        </span>
-      </div>
-    </div>
-  );
 }
 
 export function ExerciseMedia({
@@ -91,19 +33,35 @@ export function ExerciseMedia({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const youtubeUrl = exercise.youtubeUrl || exercise.media?.video;
+  const videoId = getYouTubeId(youtubeUrl);
+
+  // URL da capa/thumbnail estática do YouTube
+  const thumbnailUrl = videoId
+    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+    : exercise.media?.image;
 
   return (
     <>
+      {/* Botão de abertura com thumbnail estática */}
       <button
         type="button"
-        onClick={handleOpen}
+        onClick={() => setOpen(true)}
         aria-label={`Ver execução: ${exercise.name}`}
         className="flex min-h-11 items-center gap-3 rounded-2xl border border-border bg-card px-2.5 py-2 text-left transition-colors hover:bg-muted/60 active:scale-[0.99]"
       >
-        <span className="h-12 w-16 shrink-0 overflow-hidden rounded-xl">
-          <MediaFrame exercise={exercise} />
+        <span className="relative h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
+          {thumbnailUrl ? (
+            <img
+              src={thumbnailUrl}
+              alt={`Execução: ${exercise.name}`}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="grid h-full w-full place-items-center">
+              <Play size={16} className="text-muted-foreground" />
+            </div>
+          )}
         </span>
 
         <span className="text-sm font-bold text-muted-foreground">
@@ -111,12 +69,13 @@ export function ExerciseMedia({
         </span>
       </button>
 
+      {/* Modal contendo o Iframe/Player */}
       {open && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={`Execução: ${exercise.name}`}
-          onClick={handleClose}
+          onClick={() => setOpen(false)}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm"
         >
           <div
@@ -131,7 +90,7 @@ export function ExerciseMedia({
 
               <button
                 type="button"
-                onClick={handleClose}
+                onClick={() => setOpen(false)}
                 aria-label="Fechar"
                 className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground transition-colors hover:bg-muted/80"
               >
@@ -139,9 +98,27 @@ export function ExerciseMedia({
               </button>
             </div>
 
-            {/* Mídia */}
-            <div className="aspect-video w-full overflow-hidden bg-muted">
-              <MediaFrame exercise={exercise} large />
+            {/* Mídia dentro do Modal */}
+            <div className="aspect-video w-full overflow-hidden bg-black">
+              {videoId ? (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`}
+                  title={`Execução: ${exercise.name}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="h-full w-full border-0"
+                />
+              ) : thumbnailUrl ? (
+                <img
+                  src={thumbnailUrl}
+                  alt={`Execução: ${exercise.name}`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="grid h-full w-full place-items-center text-muted-foreground">
+                  <Play size={24} />
+                </div>
+              )}
             </div>
 
             <div className="space-y-4 px-5 py-4">

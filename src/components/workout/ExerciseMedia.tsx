@@ -121,7 +121,7 @@ async function fetchExerciseFromApi(
     "https://oss.exercisedb.dev/api/v1/exercises",
   );
 
-  url.searchParams.set("search", searchName.trim());
+  url.searchParams.set("name", searchName.trim());
 
   console.log("=================================");
   console.log("ExerciseDB");

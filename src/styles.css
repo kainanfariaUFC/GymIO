@@ -130,3 +130,9 @@
   box-shadow: 0 2px 14px -6px oklch(0.1 0.01 250 / 55%),
     0 1px 3px oklch(0.1 0.01 250 / 35%);
 }
+
+#lovable-badge, [data-lovable-badge], .lovable-watermark {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}

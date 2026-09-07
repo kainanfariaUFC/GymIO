@@ -36,7 +36,7 @@ function MediaFrame({
 }) {
   const media = exercise.media;
 
-  // Quando a API encontrar o exercício, prioriza o GIF da ExerciseDB.
+  // Prioriza a mídia encontrada na ExerciseDB.
   if (apiExercise?.gifUrl) {
     return (
       <img
@@ -49,6 +49,7 @@ function MediaFrame({
     );
   }
 
+  // Fallback para a mídia que já existe no exercício.
   if (media?.video) {
     return (
       <video
@@ -96,13 +97,21 @@ function MediaFrame({
 async function fetchExerciseFromApi(
   exerciseName: string,
 ): Promise<ExerciseDbResult | null> {
-  const params = new URLSearchParams({
-    search: exerciseName,
-  });
+  const url = new URL("https://oss.exercisedb.dev/api/v1/exercises");
 
-  const response = await fetch(
-    `https://oss.exercisedb.dev/api/v1/exercises?${params.toString()}`,
-  );
+  // Usa SEMPRE o nome do exercício que foi clicado.
+  url.searchParams.set("search", exerciseName.trim());
+
+  console.log("ExerciseDB - buscando:", exerciseName);
+  console.log("ExerciseDB - URL:", url.toString());
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw new Error(`ExerciseDB API retornou ${response.status}`);
@@ -110,60 +119,106 @@ async function fetchExerciseFromApi(
 
   const result: ExerciseDbResponse = await response.json();
 
+  console.log("ExerciseDB - resposta:", result);
+
   if (!result.success || !result.data?.length) {
     return null;
   }
 
-  // Primeiro tenta encontrar correspondência exata.
   const normalizedName = exerciseName.trim().toLowerCase();
 
+  // Primeiro tenta encontrar o nome exatamente igual.
   const exactMatch = result.data.find(
     (item) => item.name.trim().toLowerCase() === normalizedName,
   );
 
-  return exactMatch ?? result.data[0];
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  // Caso a API retorne resultados aproximados,
+  // usamos o primeiro resultado.
+  return result.data[0];
 }
 
 export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [apiExercise, setApiExercise] = useState<ExerciseDbResult | null>(null);
+  const [apiExercise, setApiExercise] = useState<ExerciseDbResult | null>(
+    null,
+  );
   const [apiError, setApiError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
+  // Identifica cada requisição para impedir que uma resposta antiga
+  // sobrescreva a resposta do último exercício clicado.
+  const [requestId, setRequestId] = useState(0);
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         setOpen(false);
       }
     };
 
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
   const handleOpen = async () => {
-    // Abre imediatamente o modal para mostrar o loading.
+    // Captura o exercício EXATO deste botão.
+    const currentExerciseName = exercise.name.trim();
+
+    // Gera um ID único para esta busca.
+    const currentRequestId = requestId + 1;
+    setRequestId(currentRequestId);
+
+    console.log(
+      "ExerciseMedia - exercício clicado:",
+      currentExerciseName,
+    );
+
+    // Abre o modal.
     setOpen(true);
-    setLoading(true);
+
+    // Limpa completamente os dados da busca anterior.
     setApiExercise(null);
     setApiError(null);
+    setLoading(true);
 
     try {
-      const result = await fetchExerciseFromApi(exercise.name);
+      const result = await fetchExerciseFromApi(currentExerciseName);
 
-      if (!result) {
-        setApiError("Não encontramos esse exercício na ExerciseDB.");
+      // Se outra busca foi iniciada enquanto essa estava acontecendo,
+      // ignora esta resposta.
+      if (currentRequestId !== requestId + 1) {
         return;
       }
 
+      if (!result) {
+        setApiError(
+          `Não encontramos "${currentExerciseName}" na ExerciseDB.`,
+        );
+        return;
+      }
+
+      console.log(
+        "ExerciseMedia - exercício encontrado:",
+        result.name,
+      );
+
       setApiExercise(result);
     } catch (error) {
-      console.error("Erro ao buscar exercício na ExerciseDB:", error);
+      console.error(
+        `ExerciseMedia - erro ao buscar "${currentExerciseName}":`,
+        error,
+      );
 
       setApiError(
         "Não foi possível carregar os dados do exercício. Tente novamente.",
@@ -175,6 +230,7 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
 
   const handleClose = () => {
     setOpen(false);
+    setLoading(false);
     setApiExercise(null);
     setApiError(null);
   };
@@ -205,9 +261,10 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
           className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm"
         >
           <div
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
             className="w-full max-w-md overflow-hidden rounded-3xl bg-card shadow-soft"
           >
+            {/* Header */}
             <div className="flex items-start gap-3 px-5 pb-3 pt-5">
               <p className="min-w-0 flex-1 text-base font-bold leading-snug text-foreground">
                 {exercise.name}
@@ -217,12 +274,13 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
                 type="button"
                 onClick={handleClose}
                 aria-label="Fechar"
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground"
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground transition-colors hover:bg-muted/80"
               >
                 <X size={18} aria-hidden />
               </button>
             </div>
 
+            {/* Mídia */}
             <div className="aspect-video w-full overflow-hidden bg-muted">
               {loading ? (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-muted-foreground">
@@ -237,7 +295,7 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
                   </span>
                 </div>
               ) : apiError ? (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-6 text-center">
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center">
                   <span className="grid h-12 w-12 place-items-center rounded-full bg-card text-muted-foreground shadow-soft">
                     <Play size={20} aria-hidden />
                   </span>
@@ -255,63 +313,63 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
               )}
             </div>
 
+            {/* Informações */}
             <div className="space-y-4 px-5 py-4">
               <p className="text-sm text-muted-foreground">
                 {exercise.sets} · {exercise.muscle}
               </p>
 
-              {apiExercise && (
-                <>
-                  {apiExercise.equipments?.length ? (
-                    <div>
-                      <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        Equipamento
-                      </p>
+              {apiExercise?.equipments &&
+              apiExercise.equipments.length > 0 ? (
+                <div>
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Equipamento
+                  </p>
 
-                      <p className="text-sm text-foreground">
-                        {apiExercise.equipments.join(", ")}
-                      </p>
-                    </div>
-                  ) : null}
+                  <p className="text-sm text-foreground">
+                    {apiExercise.equipments.join(", ")}
+                  </p>
+                </div>
+              ) : null}
 
-                  {apiExercise.targetMuscles?.length ? (
-                    <div>
-                      <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        Músculo alvo
-                      </p>
+              {apiExercise?.targetMuscles &&
+              apiExercise.targetMuscles.length > 0 ? (
+                <div>
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Músculo alvo
+                  </p>
 
-                      <p className="text-sm text-foreground">
-                        {apiExercise.targetMuscles.join(", ")}
-                      </p>
-                    </div>
-                  ) : null}
+                  <p className="text-sm text-foreground">
+                    {apiExercise.targetMuscles.join(", ")}
+                  </p>
+                </div>
+              ) : null}
 
-                  {apiExercise.instructions?.length ? (
-                    <div>
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        Como executar
-                      </p>
+              {apiExercise?.instructions &&
+              apiExercise.instructions.length > 0 ? (
+                <div>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Como executar
+                  </p>
 
-                      <ol className="space-y-2">
-                        {apiExercise.instructions.map((instruction, index) => (
-                          <li
-                            key={`${apiExercise.exerciseId}-step-${index}`}
-                            className="flex gap-2 text-sm leading-relaxed text-foreground"
-                          >
-                            <span className="shrink-0 font-bold text-muted-foreground">
-                              {index + 1}.
-                            </span>
+                  <ol className="space-y-2">
+                    {apiExercise.instructions.map((instruction, index) => (
+                      <li
+                        key={`${apiExercise.exerciseId}-step-${index}`}
+                        className="flex gap-2 text-sm leading-relaxed text-foreground"
+                      >
+                        <span className="shrink-0 font-bold text-muted-foreground">
+                          {index + 1}.
+                        </span>
 
-                            <span>
-                              {instruction.replace(/^Step:\d+\s*/i, "")}
-                            </span>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  ) : null}
-                </>
-              )}
+                        <span>
+                          {instruction.replace(/^Step:\d+\s*/i, "")}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

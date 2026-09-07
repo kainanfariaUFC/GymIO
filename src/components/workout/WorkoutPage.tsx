@@ -230,45 +230,6 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
         ))}
       </div>
 
-      {/* Por que essa divisão funciona */}
-      <section className="mt-8 overflow-hidden rounded-3xl bg-sand shadow-soft">
-        <button
-          type="button"
-          onClick={() => setWhyOpen((o) => !o)}
-          aria-expanded={whyOpen}
-          className="flex w-full items-center gap-3 px-5 py-5 text-left"
-        >
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-card text-sand-foreground">
-            <CircleHelp size={20} aria-hidden />
-          </span>
-          <span className="min-w-0 flex-1 text-lg font-bold leading-tight text-foreground">
-            Por que essa divisão funciona
-          </span>
-          <ChevronDown
-            size={22}
-            aria-hidden
-            className={`shrink-0 text-sand-foreground transition-transform duration-300 ${
-              whyOpen ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-        <div
-          className={`grid transition-all duration-300 ease-out ${
-            whyOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="space-y-3 px-5 pb-6">
-              {day.whyItWorks.map((paragraph, i) => (
-                <p key={i} className="text-sm leading-relaxed text-sand-foreground">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Reiniciar treino */}
       <button
         type="button"

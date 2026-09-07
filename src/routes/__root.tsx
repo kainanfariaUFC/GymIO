@@ -128,6 +128,36 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function BottomNav() {
+  const tabs = [
+    { to: "/dia-a" as const, label: "Dia A" },
+    { to: "/dia-b" as const, label: "Dia B" },
+  ];
+
+  return (
+    <nav
+      aria-label="Dias de treino"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+    >
+      <div className="mx-auto grid max-w-xl grid-cols-2 gap-2 px-4 py-2.5">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.to}
+            to={tab.to}
+            aria-label={`Ir para o treino ${tab.label}`}
+            className="flex min-h-14 items-center justify-center gap-2 rounded-2xl text-base font-bold text-muted-foreground transition-colors"
+            activeOptions={{ exact: true }}
+            activeProps={{ className: "bg-primary/25 text-primary-foreground" }}
+          >
+            <Dumbbell size={20} aria-hidden />
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 

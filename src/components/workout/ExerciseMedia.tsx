@@ -35,7 +35,7 @@ function MediaFrame({ exercise, large }: { exercise: Exercise; large?: boolean }
 
   return (
     <div className="grid h-full w-full place-items-center gap-2 bg-muted px-3 text-center">
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center">
         <span
           className="grid h-11 w-11 place-items-center rounded-full bg-card text-muted-foreground shadow-soft"
           style={{ width: "30px", height: "30px" }}

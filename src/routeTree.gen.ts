@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DiaARouteImport } from './routes/dia-a'
+import { Route as DiaBRouteImport } from './routes/dia-b'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiaARoute = DiaARouteImport.update({
+  id: '/dia-a',
+  path: '/dia-a',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiaBRoute = DiaBRouteImport.update({
+  id: '/dia-b',
+  path: '/dia-b',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dia-a': typeof DiaARoute
+  '/dia-b': typeof DiaBRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dia-a': typeof DiaARoute
+  '/dia-b': typeof DiaBRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dia-a': typeof DiaARoute
+  '/dia-b': typeof DiaBRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/dia-a' | '/dia-b'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/dia-a' | '/dia-b'
+  id: '__root__' | '/' | '/dia-a' | '/dia-b'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DiaARoute: typeof DiaARoute
+  DiaBRoute: typeof DiaBRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dia-a': {
+      id: '/dia-a'
+      path: '/dia-a'
+      fullPath: '/dia-a'
+      preLoaderRoute: typeof DiaARouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dia-b': {
+      id: '/dia-b'
+      path: '/dia-b'
+      fullPath: '/dia-b'
+      preLoaderRoute: typeof DiaBRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DiaARoute: DiaARoute,
+  DiaBRoute: DiaBRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

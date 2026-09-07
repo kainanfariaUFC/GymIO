@@ -19,7 +19,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "2×10",
             muscle: "Corpo todo",
             media: {
-              video: "https://www.youtube.com/watch?v=F33-i_p34Z8",
+              video: "https://www.youtube.com/watch?v=aclHkVaku9U",
             },
           },
         ],
@@ -39,7 +39,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×8–10",
             muscle: "Quadríceps/Glúteos",
             media: {
-              video: "https://www.youtube.com/watch?v=R_3nU_0sKzA",
+              video: "https://www.youtube.com/watch?v=v_O3e98fSgo",
             },
           },
           {
@@ -49,7 +49,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×8–10",
             muscle: "Peitoral",
             media: {
-              video: "https://www.youtube.com/watch?v=0G31a5K1A_0",
+              video: "https://www.youtube.com/watch?v=VmB1G1K7v94",
             },
           },
           {
@@ -59,7 +59,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×10–12",
             muscle: "Costas",
             media: {
-              video: "https://www.youtube.com/watch?v=x0U_yUo-9bI",
+              video: "https://www.youtube.com/watch?v=CAwf7n6Luuc",
             },
           },
           {
@@ -69,7 +69,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "3×10–12",
             muscle: "Posterior de coxa/Glúteos",
             media: {
-              video: "https://www.youtube.com/watch?v=2K2e9s3f9z8",
+              video: "https://www.youtube.com/watch?v=CN_7cz3P-1U",
             },
           },
           {
@@ -79,7 +79,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "3×10–12",
             muscle: "Ombros",
             media: {
-              video: "https://www.youtube.com/watch?v=qEwKCR5JCog",
+              video: "https://www.youtube.com/watch?v=hz_69s5vKvg",
             },
           },
           {
@@ -89,7 +89,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "3×12–15",
             muscle: "Bíceps",
             media: {
-              video: "https://www.youtube.com/watch?v=kwG2ipR66sM",
+              video: "https://www.youtube.com/watch?v=in7PaeYlhrM",
             },
           },
           {
@@ -99,7 +99,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×15–20",
             muscle: "Panturrilha — máquina ou degrau com halter",
             media: {
-              video: "https://www.youtube.com/watch?v=-M4-G8p8fmc",
+              video: "https://www.youtube.com/watch?v=gwLzBJYoWlI",
             },
           },
           {
@@ -132,7 +132,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "8–10 tiros de 30s forte / 30s leve",
             muscle: "Cardio",
             media: {
-              video: "https://www.youtube.com/watch?v=9_pY4s6Wv_M",
+              video: "https://www.youtube.com/watch?v=sI32xX1Uf2Y",
             },
           },
         ],
@@ -166,7 +166,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "2×12",
             muscle: "Corpo todo",
             media: {
-              video: "https://www.youtube.com/watch?v=wX-4-XU2zYw",
+              video: "https://www.youtube.com/watch?v=13wS8bYtJlg",
             },
           },
         ],
@@ -186,7 +186,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×8–10",
             muscle: "Cadeia posterior",
             media: {
-              video: "https://www.youtube.com/watch?v=Xh3hS54d-dM",
+              video: "https://www.youtube.com/watch?v=JCXUYuzwNrM",
             },
           },
           {
@@ -196,7 +196,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×8–10",
             muscle: "Costas",
             media: {
-              video: "https://www.youtube.com/watch?v=6P3O1m6S28A",
+              video: "https://www.youtube.com/watch?v=VKFeB7L8yDg",
             },
           },
           {
@@ -206,7 +206,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×10–12",
             muscle: "Peitoral Superior",
             media: {
-              video: "https://www.youtube.com/watch?v=8iPEnn-ltC8",
+              video: "https://www.youtube.com/watch?v=0G2_XY3S634",
             },
           },
           {
@@ -214,9 +214,9 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             name: "Cadeira Extensora",
             apiName: "lever leg extension",
             sets: "3×12–15",
-            muscle: "Quadríceps — movimento controlado",
+            muscle: "Quadríceps — movimento controlledo",
             media: {
-              video: "https://www.youtube.com/watch?v=YpGqfU4G8K8",
+              video: "https://www.youtube.com/watch?v=YyvSfVjQeL0",
             },
           },
           {
@@ -236,7 +236,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "3×12–15",
             muscle: "Tríceps",
             media: {
-              video: "https://www.youtube.com/watch?v=vB5OHsJ3EME",
+              video: "https://www.youtube.com/watch?v=2-LAMcpzODU",
             },
           },
           {
@@ -256,7 +256,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "3×15",
             muscle: "Core",
             media: {
-              video: "https://www.youtube.com/watch?v=y383K-n_6-k",
+              video: "https://www.youtube.com/watch?v=hyv14e2QDq0",
             },
           },
         ],

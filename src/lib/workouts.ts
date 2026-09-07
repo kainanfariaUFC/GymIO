@@ -39,7 +39,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×8–10",
             muscle: "Quadríceps/Glúteos",
             media: {
-              video: "https://www.youtube.com/watch?v=v_O3e98fSgo",
+              video: "https://www.youtube.com/watch?v=rM6SDUdl9fs",
             },
           },
           {
@@ -79,7 +79,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "3×10–12",
             muscle: "Ombros",
             media: {
-              video: "https://www.youtube.com/watch?v=hz_69s5vKvg",
+              video: "https://www.youtube.com/watch?v=L-iQfHVeuVg",
             },
           },
           {
@@ -196,7 +196,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×8–10",
             muscle: "Costas",
             media: {
-              video: "https://www.youtube.com/watch?v=VKFeB7L8yDg",
+              video: "https://www.youtube.com/shorts/xdcwc_ccAuA",
             },
           },
           {
@@ -206,7 +206,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×10–12",
             muscle: "Peitoral Superior",
             media: {
-              video: "https://www.youtube.com/watch?v=0G2_XY3S634",
+              video: "https://www.youtube.com/shorts/ZaNyRjpoki8",
             },
           },
           {
@@ -246,7 +246,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             sets: "4×15–20",
             muscle: "Panturrilha — foco no sóleo",
             media: {
-              video: "https://www.youtube.com/watch?v=Jbyd-xUK88A",
+              video: "https://www.youtube.com/shorts/pBbSiqu7Trk",
             },
           },
           {

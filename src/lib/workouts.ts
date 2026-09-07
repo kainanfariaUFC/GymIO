@@ -5,13 +5,12 @@ export type Exercise = {
   muscle: string;
 
   /**
-   * Nome usado para pesquisar o exercício na ExerciseDB.
-   * Mantemos separado de `name` porque o nome exibido
-   * pode estar em português e conter alternativas.
+   * Nome usado para pesquisar na ExerciseDB.
+   * O nome exibido para o usuário continua sendo `name`.
    */
   apiName?: string;
 
-  /** Mídia opcional de execução (imagem ou vídeo curto em loop). */
+  /** Mídia opcional de execução */
   media?: {
     image?: string;
     video?: string;

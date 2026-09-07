@@ -1,23 +1,20 @@
-import { Play, X } from "lucide-react";
+import { ExternalLink, Play, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { Exercise } from "@/lib/workouts";
 
 /**
- * Função utilitária para extrair o ID de um vídeo do YouTube
+ * Extrai o ID de um vídeo do YouTube a partir de diversos formatos de URL
  */
 function getYouTubeId(url?: string): string | null {
   if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
 }
 
-export function ExerciseMedia({
-  exercise,
-}: {
-  exercise: Exercise;
-}) {
+export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -33,10 +30,11 @@ export function ExerciseMedia({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  const youtubeUrl = exercise.youtubeUrl || exercise.media?.video;
-  const videoId = getYouTubeId(youtubeUrl);
+  // Aceita tanto exercise.youtubeUrl quanto exercise.media.video
+  const rawUrl = exercise.youtubeUrl || exercise.media?.video;
+  const videoId = getYouTubeId(rawUrl);
 
-  // URL da capa/thumbnail estática do YouTube
+  // Capa estática do vídeo do YouTube
   const thumbnailUrl = videoId
     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
     : exercise.media?.image;
@@ -69,7 +67,7 @@ export function ExerciseMedia({
         </span>
       </button>
 
-      {/* Modal contendo o Iframe/Player */}
+      {/* Modal contendo o vídeo */}
       {open && (
         <div
           role="dialog"
@@ -102,7 +100,7 @@ export function ExerciseMedia({
             <div className="aspect-video w-full overflow-hidden bg-black">
               {videoId ? (
                 <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`}
+                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&enablejsapi=1`}
                   title={`Execução: ${exercise.name}`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -121,10 +119,23 @@ export function ExerciseMedia({
               )}
             </div>
 
-            <div className="space-y-4 px-5 py-4">
+            {/* Rodapé do Modal com Fallback para abrir no YouTube */}
+            <div className="space-y-3 px-5 py-4">
               <p className="text-sm text-muted-foreground">
                 {exercise.sets} · {exercise.muscle}
               </p>
+
+              {videoId && (
+                <a
+                  href={`https://www.youtube.com/watch?v=${videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <span>Não está carregando? Abrir no YouTube</span>
+                  <ExternalLink size={14} />
+                </a>
+              )}
             </div>
           </div>
         </div>

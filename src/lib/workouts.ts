@@ -83,7 +83,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "a-s3",
             name: "Puxada Alta Frontal na Polia",
-            apiName: "lat pulldown",
+            apiName: "cable lat pulldown",
             sets: "4×10–12",
             muscle: "Costas",
           },
@@ -104,7 +104,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "a-s6",
             name: "Rosca Direta no Pulley / Cabo",
-            apiName: "cable biceps curl",
+            apiName: "cable curl",
             sets: "3×12–15",
             muscle: "Bíceps",
           },
@@ -136,9 +136,9 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
 
         exercises: [
           {
-            id: "a-m1",
+            id: "b-m1",
             name: "Esteira em Inclinação ou Bicicleta Ergométrica (HIIT)",
-            apiName: "treadmill",
+            apiName: "treadmill walking",
             sets: "8–10 tiros de 30s forte / 30s leve",
             muscle: "Cardio",
           },
@@ -148,9 +148,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
 
     whyItWorks: [
       "A divisão A/B alterna o foco de braços entre os dias: no Dia A o bíceps entra como exercício direto (Rosca Direta), enquanto o tríceps trabalha de forma indireta nos supinos e desenvolvimento. No Dia B acontece o inverso — Tríceps Corda direto e bíceps recrutado nas remadas e puxadas. Assim cada músculo recebe estímulo direto e indireto ao longo da semana, sem sobreposição excessiva.",
-
       "A panturrilha recebe estímulo duplo e complementar: Gêmeos em Pé (Dia A) enfatiza o gastrocnêmio com o joelho estendido, enquanto Gêmeos Sentado (Dia B) foca no sóleo, com o joelho flexionado. Trabalhar as duas posições garante desenvolvimento completo da panturrilha.",
-
       "O formato full body alternado permite alta frequência semanal (cada grupo muscular estimulado 2× ou mais) com recuperação adequada entre as sessões.",
     ],
   },
@@ -171,7 +169,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "b-w1",
             name: "Mobilidade de quadril/torácica + Elevação de quadril solo",
-            apiName: "glute bridge",
+            apiName: "bridge",
             sets: "2×12",
             muscle: "Corpo todo",
           },
@@ -188,7 +186,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "b-s1",
             name: "Levantamento Terra RDL ou Terra Convencional",
-            apiName: "romanian deadlift",
+            apiName: "barbell romanian deadlift",
             sets: "4×8–10",
             muscle: "Cadeia posterior",
           },
@@ -209,7 +207,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "b-s4",
             name: "Cadeira Extensora",
-            apiName: "leg extension",
+            apiName: "lever leg extension",
             sets: "3×12–15",
             muscle: "Quadríceps — movimento controlado",
           },
@@ -230,14 +228,14 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
           {
             id: "b-s7",
             name: "Gêmeos Sentado na Máquina",
-            apiName: "seated calf raise",
+            apiName: "lever seated calf raise",
             sets: "4×15–20",
             muscle: "Panturrilha — foco no sóleo",
           },
           {
             id: "b-s8",
-            name: "Abdominal Infra no Banco / Paraleira",
-            apiName: "leg raise",
+            name: "Abdominal Infra no Banco / Paralela",
+            apiName: "lying leg raise",
             sets: "3×15",
             muscle: "Core",
           },
@@ -281,9 +279,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
 
     whyItWorks: [
       "A divisão A/B alterna o foco de braços entre os dias: no Dia A o bíceps entra como exercício direto (Rosca Direta), enquanto o tríceps trabalha de forma indireta nos supinos e desenvolvimento. No Dia B acontece o inverso — Tríceps Corda direto e bíceps recrutado nas remadas e puxadas. Assim cada músculo recebe estímulo direto e indireto ao longo da semana, sem sobreposição excessiva.",
-
       "A panturrilha recebe estímulo duplo e complementar: Gêmeos em Pé (Dia A) enfatiza o gastrocnêmio com o joelho estendido, enquanto Gêmeos Sentado (Dia B) foca no sóleo, com o joelho flexionado. Trabalhar as duas posições garante desenvolvimento completo da panturrilha.",
-
       "O formato full body alternado permite alta frequência semanal (cada grupo muscular estimulado 2× ou mais) com recuperação adequada entre as sessões.",
     ],
   },

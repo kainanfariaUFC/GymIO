@@ -15,6 +15,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { useSessionChecks } from "@/hooks/use-session-checks";
 import type { Exercise, WorkoutBlock, WorkoutDay } from "@/lib/workouts";
 import { IntervalTimer } from "@/components/workout/IntervalTimer";
+import { ExerciseMedia } from "@/components/workout/ExerciseMedia";
 
 function muscleIcon(muscle: string): ReactNode {
   const m = muscle.toLowerCase();
@@ -88,6 +89,9 @@ function ExerciseRow({
           </span>
         </span>
       </button>
+      <div className="pb-3 pl-13 pr-2">
+        <ExerciseMedia exercise={exercise} />
+      </div>
     </li>
   );
 }

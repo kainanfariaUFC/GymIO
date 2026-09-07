@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Dumbbell } from "lucide-react";
+
+import { ThemeToggle, themeInitScript } from "@/components/ThemeToggle";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
@@ -116,9 +118,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
         {children}
@@ -164,6 +167,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <ThemeToggle />
       <Outlet />
       <BottomNav />
     </QueryClientProvider>

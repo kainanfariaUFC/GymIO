@@ -3,6 +3,8 @@ export type Exercise = {
   name: string;
   sets: string;
   muscle: string;
+  /** Mídia opcional de execução (imagem ou vídeo curto em loop). */
+  media?: { image?: string; video?: string };
 };
 
 export type WorkoutBlock = {

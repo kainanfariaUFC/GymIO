@@ -1,3 +1,33 @@
+export type Exercise = {
+  id: string;
+  name: string;
+  apiName?: string;
+  sets: string;
+  muscle: string;
+  media?: {
+    video?: string;
+    image?: string;
+  };
+};
+
+export type WorkoutBlock = {
+  id: string;
+  title: string;
+  duration: string;
+  kind: "warmup" | "strength" | "metabolic";
+  note?: string;
+  timer?: boolean;
+  exercises: Exercise[];
+};
+
+export type WorkoutDay = {
+  slug: string;
+  label: string;
+  headline: string;
+  blocks: WorkoutBlock[];
+  whyItWorks: string[];
+};
+
 export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
   "dia-a": {
     slug: "dia-a",

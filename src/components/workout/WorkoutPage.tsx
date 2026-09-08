@@ -27,7 +27,7 @@ function muscleIcon(muscle: string): ReactNode {
   if (m.includes("core")) return <Activity {...props} />;
   if (m.includes("panturrilha")) return <Footprints {...props} />;
   if (m.includes("corpo todo")) return <PersonStanding {...props} />;
-  return <Dumbbell {...props} />;
+  return <Dumbbell {...props} />; 
 }
 
 const kindStyles: Record<WorkoutBlock["kind"], { chip: string; icon: ReactNode; step: string }> = {

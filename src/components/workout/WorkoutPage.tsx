@@ -191,6 +191,43 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
   const doneTotal = allExercises.filter((e) => checked[e.id]).length;
   const pct = allExercises.length === 0 ? 0 : Math.round((doneTotal / allExercises.length) * 100);
 
+  const [completions, setCompletions] = useState<Completion[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [justFinished, setJustFinished] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setLoadingHistory(true);
+    fetchCompletions()
+      .then((rows) => active && setCompletions(rows))
+      .catch(() => active && setError("Não foi possível carregar seu histórico."))
+      .finally(() => active && setLoadingHistory(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const today = todayKey();
+  const todayDone = completions.find((c) => c.completed_on === today);
+
+  const handleFinish = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const row = await finishWorkout(day.slug);
+      setCompletions((prev) =>
+        prev.some((c) => c.completed_on === row.completed_on) ? prev : [row, ...prev],
+      );
+      setJustFinished(true);
+    } catch {
+      setError("Não foi possível salvar. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-xl px-4 pb-32 pt-8 sm:px-6">
       {/* Topo: título + progresso */}

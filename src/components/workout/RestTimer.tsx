@@ -42,6 +42,15 @@ export function RestTimer() {
         Descanso
       </span>
 
+      <span
+        className={`font-mono text-lg font-bold tabular-nums ${
+          done ? "text-accent-foreground" : "text-foreground"
+        }`}
+        aria-live="polite"
+      >
+        {done ? "Pronto!" : `${mm}:${ss}`}
+      </span>
+
       <div className="flex gap-1" role="group" aria-label="Tempo de descanso">
         {OPTIONS.map((s) => (
           <button
@@ -59,20 +68,11 @@ export function RestTimer() {
           </button>
         ))}
       </div>
-
-      <span
-        className={`ml-auto font-mono text-lg font-bold tabular-nums ${
-          done ? "text-accent-foreground" : "text-foreground"
-        }`}
-        aria-live="polite"
-      >
-        {done ? "Pronto!" : `${mm}:${ss}`}
-      </span>
-
+      
       <button
         type="button"
         onClick={() => (done ? pick(duration) : setRunning((r) => !r))}
-        className="grid h-10 w-10 place-items-center rounded-full bg-primary/30 text-foreground transition-colors hover:bg-primary/50"
+        className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-primary/30 text-foreground transition-colors hover:bg-primary/50"
         aria-label={done ? "Reiniciar descanso" : running ? "Pausar descanso" : "Iniciar descanso"}
       >
         {done ? <RotateCcw size={18} /> : running ? <Pause size={18} /> : <Play size={18} />}

@@ -10,12 +10,15 @@ import {
   PersonStanding,
   RotateCcw,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { useSessionChecks } from "@/hooks/use-session-checks";
 import type { Exercise, WorkoutBlock, WorkoutDay } from "@/lib/workouts";
 import { IntervalTimer } from "@/components/workout/IntervalTimer";
 import { ExerciseMedia } from "@/components/workout/ExerciseMedia";
+import { RestTimer } from "@/components/workout/RestTimer";
+import { HistoryCalendar } from "@/components/workout/HistoryCalendar";
+import { fetchCompletions, finishWorkout, todayKey, type Completion } from "@/lib/workout-log";
 
 function muscleIcon(muscle: string): ReactNode {
   const m = muscle.toLowerCase();
@@ -91,6 +94,7 @@ function ExerciseRow({
       </button>
       <div className="pb-3 pl-13 pr-2">
         <ExerciseMedia exercise={exercise} />
+        <RestTimer />
       </div>
     </li>
   );

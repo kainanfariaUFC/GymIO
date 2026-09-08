@@ -10,12 +10,15 @@ import {
   PersonStanding,
   RotateCcw,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { useSessionChecks } from "@/hooks/use-session-checks";
 import type { Exercise, WorkoutBlock, WorkoutDay } from "@/lib/workouts";
 import { IntervalTimer } from "@/components/workout/IntervalTimer";
 import { ExerciseMedia } from "@/components/workout/ExerciseMedia";
+import { RestTimer } from "@/components/workout/RestTimer";
+import { HistoryCalendar } from "@/components/workout/HistoryCalendar";
+import { fetchCompletions, finishWorkout, todayKey, type Completion } from "@/lib/workout-log";
 
 function muscleIcon(muscle: string): ReactNode {
   const m = muscle.toLowerCase();
@@ -91,6 +94,7 @@ function ExerciseRow({
       </button>
       <div className="pb-3 pl-13 pr-2">
         <ExerciseMedia exercise={exercise} />
+        <RestTimer />
       </div>
     </li>
   );
@@ -187,6 +191,43 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
   const doneTotal = allExercises.filter((e) => checked[e.id]).length;
   const pct = allExercises.length === 0 ? 0 : Math.round((doneTotal / allExercises.length) * 100);
 
+  const [completions, setCompletions] = useState<Completion[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [justFinished, setJustFinished] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setLoadingHistory(true);
+    fetchCompletions()
+      .then((rows) => active && setCompletions(rows))
+      .catch(() => active && setError("Não foi possível carregar seu histórico."))
+      .finally(() => active && setLoadingHistory(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const today = todayKey();
+  const todayDone = completions.find((c) => c.completed_on === today);
+
+  const handleFinish = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const row = await finishWorkout(day.slug);
+      setCompletions((prev) =>
+        prev.some((c) => c.completed_on === row.completed_on) ? prev : [row, ...prev],
+      );
+      setJustFinished(true);
+    } catch {
+      setError("Não foi possível salvar. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-xl px-4 pb-32 pt-8 sm:px-6">
       {/* Topo: título + progresso */}
@@ -233,6 +274,43 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
           />
         ))}
       </div>
+
+      {/* Finalizar treino */}
+      <div className="mt-8">
+        {todayDone ? (
+          <div className="flex items-start gap-3 rounded-2xl bg-accent/25 px-5 py-5 text-left shadow-soft">
+            <Check size={22} className="mt-0.5 shrink-0 text-accent-foreground" aria-hidden />
+            <div>
+              <p className="text-base font-bold text-foreground">
+                {justFinished ? "Treino concluído com sucesso!" : "Treino de hoje já finalizado"}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Você finalizou o {todayDone.day_slug === "dia-a" ? "Dia A" : "Dia B"} hoje. Um novo
+                treino é liberado amanhã.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleFinish}
+            disabled={saving || loadingHistory || doneTotal === 0}
+            className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-accent px-5 py-4 text-base font-bold text-accent-foreground shadow-soft transition-opacity active:scale-[0.99] disabled:opacity-50"
+          >
+            <Check size={20} aria-hidden />
+            {saving ? "Salvando…" : "Finalizar treino"}
+          </button>
+        )}
+        {!todayDone && doneTotal === 0 && !loadingHistory && (
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Marque ao menos um exercício para finalizar.
+          </p>
+        )}
+        {error && <p className="mt-2 text-center text-sm text-destructive">{error}</p>}
+      </div>
+
+      {/* Histórico */}
+      <HistoryCalendar completions={completions} loading={loadingHistory} />
 
       {/* Reiniciar treino */}
       <button

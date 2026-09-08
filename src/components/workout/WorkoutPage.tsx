@@ -239,8 +239,7 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
           {day.headline}
         </h1>
 
-        {/* Histórico */}
-        <HistoryCalendar completions={completions} loading={loadingHistory} />
+        
 
         <div className="mt-5 rounded-2xl bg-card p-4 shadow-soft">
           <div className="flex items-baseline justify-between gap-3">
@@ -311,6 +310,9 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
         )}
         {error && <p className="mt-2 text-center text-sm text-destructive">{error}</p>}
       </div>
+
+      {/* Histórico */}
+      <HistoryCalendar completions={completions} loading={loadingHistory} />
 
       {/* Reiniciar treino */}
       <button

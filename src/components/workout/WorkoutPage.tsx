@@ -275,6 +275,43 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
         ))}
       </div>
 
+      {/* Finalizar treino */}
+      <div className="mt-8">
+        {todayDone ? (
+          <div className="flex items-start gap-3 rounded-2xl bg-accent/25 px-5 py-5 text-left shadow-soft">
+            <Check size={22} className="mt-0.5 shrink-0 text-accent-foreground" aria-hidden />
+            <div>
+              <p className="text-base font-bold text-foreground">
+                {justFinished ? "Treino concluído com sucesso!" : "Treino de hoje já finalizado"}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Você finalizou o {todayDone.day_slug === "dia-a" ? "Dia A" : "Dia B"} hoje. Um novo
+                treino é liberado amanhã.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleFinish}
+            disabled={saving || loadingHistory || doneTotal === 0}
+            className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-accent px-5 py-4 text-base font-bold text-accent-foreground shadow-soft transition-opacity active:scale-[0.99] disabled:opacity-50"
+          >
+            <Check size={20} aria-hidden />
+            {saving ? "Salvando…" : "Finalizar treino"}
+          </button>
+        )}
+        {!todayDone && doneTotal === 0 && !loadingHistory && (
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Marque ao menos um exercício para finalizar.
+          </p>
+        )}
+        {error && <p className="mt-2 text-center text-sm text-destructive">{error}</p>}
+      </div>
+
+      {/* Histórico */}
+      <HistoryCalendar completions={completions} loading={loadingHistory} />
+
       {/* Reiniciar treino */}
       <button
         type="button"

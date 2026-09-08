@@ -114,7 +114,11 @@ function BlockCard({
   const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
   const isOpen = open ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
-  const style = kindStyles[block.kind];
+  const style = kindStyles[block.kind] ?? {
+    chip: "bg-muted text-muted-foreground",
+    icon: <Dumbbell size={18} aria-hidden />,
+    step: "",
+  };
 
   const doneCount = block.exercises.filter((e) => checked[e.id]).length;
 

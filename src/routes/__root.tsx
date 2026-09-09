@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Dumbbell } from "lucide-react";
 
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { ThemeToggle, themeInitScript } from "@/components/ThemeToggle";
 import { useEffect, type ReactNode } from "react";
 
@@ -101,7 +102,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -168,6 +171,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ThemeToggle />
+      <InstallPrompt />
       <Outlet />
       <BottomNav />
     </QueryClientProvider>

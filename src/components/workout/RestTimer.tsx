@@ -31,6 +31,11 @@ export function RestTimer() {
     setRunning(false);
   };
 
+  const reset = () => {
+    setLeft(duration);
+    setRunning(false);
+  };
+
   const mm = String(Math.floor(left / 60)).padStart(2, "0");
   const ss = String(left % 60).padStart(2, "0");
   const done = left === 0;
@@ -68,15 +73,27 @@ export function RestTimer() {
           </button>
         ))}
       </div>
-      
-      <button
-        type="button"
-        onClick={() => (done ? pick(duration) : setRunning((r) => !r))}
-        className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-primary/30 text-foreground transition-colors hover:bg-primary/50"
-        aria-label={done ? "Reiniciar descanso" : running ? "Pausar descanso" : "Iniciar descanso"}
-      >
-        {done ? <RotateCcw size={18} /> : running ? <Pause size={18} /> : <Play size={18} />}
-      </button>
+
+      <div className="ml-auto flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => setRunning((r) => !r)}
+          disabled={done}
+          className="grid h-10 w-10 place-items-center rounded-full bg-primary/30 text-foreground transition-colors hover:bg-primary/50 disabled:opacity-50"
+          aria-label={running ? "Pausar descanso" : "Iniciar descanso"}
+        >
+          {running ? <Pause size={18} /> : <Play size={18} />}
+        </button>
+
+        <button
+          type="button"
+          onClick={reset}
+          className="grid h-10 w-10 place-items-center rounded-full bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label="Zerar cronômetro de descanso"
+        >
+          <RotateCcw size={18} />
+        </button>
+      </div>
     </div>
   );
 }

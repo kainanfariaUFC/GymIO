@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Dumbbell } from "lucide-react";
 
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { ThemeToggle, themeInitScript } from "@/components/ThemeToggle";
 import { useEffect, type ReactNode } from "react";
 

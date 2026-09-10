@@ -1,6 +1,6 @@
 {
   "name": "Minha Rotina de Treino com GymIO",
-  "short_name": "GymIO",
+  "short_name": "GymIO", 
   "description": "Acompanhe sua rotina semanal: força, metabólico e progresso marcado na hora.",
   "start_url": "/",
   "display": "standalone",

@@ -227,7 +227,7 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 pb-32 pt-8 sm:px-6">
+    <div className="mx-auto w-full max-w-xl px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-8 sm:px-6">
       {/* Topo: título + progresso */}
       <header className="mb-7">
         <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">

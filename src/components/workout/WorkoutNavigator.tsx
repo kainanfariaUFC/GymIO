@@ -14,7 +14,7 @@ export function WorkoutNavigator({
   if (workouts.length <= 1) return null;
 
   return (
-    <nav className="sticky top-0 z-20 bg-background/80 px-4 pt-4 backdrop-blur-md">
+    <nav className="fixed inset-x-0 bottom-0 z-20 bg-background/90 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md">
       <div className="mx-auto flex max-w-xl gap-2 overflow-x-auto rounded-2xl bg-muted p-1.5 shadow-inner">
         {workouts.map((workout) => {
           const isActive = workout.slug === activeSlug;

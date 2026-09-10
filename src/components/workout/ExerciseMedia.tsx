@@ -1,7 +1,7 @@
 import { ChevronDown, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import type { Exercise } from "@/lib/workouts";
+import type { Exercise } from "@/lib/workout-types";
 
 /**
  * Extrai o ID de um vídeo do YouTube a partir de diversos formatos de URL
@@ -20,6 +20,11 @@ function getYouTubeId(url?: string): string | null {
   return match && match[2] && match[2].length === 11 ? match[2] : null;
 }
 
+function isMp4Url(url?: string): boolean {
+  const normalizedUrl = url?.trim().toLowerCase();
+  return Boolean(normalizedUrl && normalizedUrl.split(/[?#]/)[0]?.endsWith(".mp4"));
+}
+
 export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const [open, setOpen] = useState(false);
   const [imageLoadFailed, setImageLoadFailed] = useState(false);
@@ -28,18 +33,21 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const mediaUrl = exercise.mediaUrl;
   const rawVideoUrl = exercise.media?.video || (exercise as any).youtubeUrl;
   const videoId = getYouTubeId(rawVideoUrl);
+  const directVideoUrl = [mediaUrl, exercise.media?.video].find(isMp4Url);
 
-  // Se houver vídeo do YouTube, a thumbnail é a do YouTube. Caso contrário, usa o mediaUrl / image
+  // Se houver vídeo do YouTube, a thumbnail é a do YouTube. Caso contrário, usa a imagem disponível.
   const thumbnailUrl = videoId
     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-    : mediaUrl || exercise.media?.image;
+    : directVideoUrl
+      ? undefined
+      : mediaUrl || exercise.media?.image;
 
   useEffect(() => {
     setImageLoadFailed(false);
   }, [thumbnailUrl]);
 
   // Se o exercício não tiver nenhuma mídia associada, não exibe o accordion
-  if (!thumbnailUrl && !videoId) {
+  if (!thumbnailUrl && !videoId && !directVideoUrl) {
     return null;
   }
 
@@ -83,6 +91,20 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="absolute inset-0 h-full w-full border-0"
+                />
+              ) : open && directVideoUrl && !imageLoadFailed ? (
+                <video
+                  key={directVideoUrl}
+                  src={directVideoUrl}
+                  title={`Demonstração: ${exercise.name}`}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls
+                  preload="metadata"
+                  className="absolute inset-0 h-full w-full object-contain"
+                  onError={() => setImageLoadFailed(true)}
                 />
               ) : open && thumbnailUrl && !imageLoadFailed ? (
                 <img

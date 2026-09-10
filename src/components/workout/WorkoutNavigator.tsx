@@ -1,4 +1,4 @@
-import type { WorkoutDay } from "@/lib/workouts";
+import type { WorkoutDay } from "@/lib/workout-types";
 
 interface WorkoutNavigatorProps {
   workouts: WorkoutDay[];

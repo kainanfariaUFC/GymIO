@@ -12,7 +12,11 @@ import {
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { useSessionChecks } from "@/hooks/use-session-checks";
-import type { Exercise, WorkoutBlock, WorkoutDay } from "@/lib/workouts";
+import type {
+  Exercise,
+  WorkoutBlock,
+  WorkoutDay,
+} from "@/lib/workout-types";
 import { IntervalTimer } from "@/components/workout/IntervalTimer";
 import { ExerciseMedia } from "@/components/workout/ExerciseMedia";
 import { RestTimer } from "@/components/workout/RestTimer";

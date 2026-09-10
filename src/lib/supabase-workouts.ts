@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { WorkoutBlock, WorkoutDay, Exercise } from "@/lib/workouts";
+import type { WorkoutBlock, WorkoutDay, Exercise } from "@/lib/workout-types";
 
 // Estrutura de cada exercício preenchido pelo professor
 export type RawExercise = {

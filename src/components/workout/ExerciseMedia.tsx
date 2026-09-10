@@ -78,8 +78,7 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
           <div className="px-3 pb-3">
             <div
               ref={contentRef}
-              className="relative aspect-video w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/40"
-              styles={{height: "415px"}}
+              className="relative h-[415px] w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/40"
             >
               {open && videoId ? (
                 <iframe

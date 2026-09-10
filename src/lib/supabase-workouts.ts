@@ -137,7 +137,9 @@ export function mapPlanToWorkoutDays(data: StudentPlanRow): StudentPlan {
 
 export async function fetchStudentPlanById(id: string): Promise<StudentPlan | null> {
   const { data, error } = await supabase
-    .rpc("get_shared_workout", { _workout_id: id })
+    .from("treinos")
+    .select("*")
+    .eq("id", id)
     .single();
 
   if (error || !data) {

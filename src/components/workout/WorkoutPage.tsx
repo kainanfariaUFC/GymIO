@@ -2,7 +2,6 @@ import {
   Activity,
   Check,
   ChevronDown,
-  CircleHelp,
   Dumbbell,
   Flame,
   Footprints,
@@ -185,7 +184,6 @@ function BlockCard({
 
 export function WorkoutPage({ day }: { day: WorkoutDay }) {
   const { checked, toggle, reset } = useSessionChecks(`treino:${day.slug}`);
-  const [whyOpen, setWhyOpen] = useState(false);
 
   const allExercises = useMemo(() => day.blocks.flatMap((b) => b.exercises), [day]);
   const doneTotal = allExercises.filter((e) => checked[e.id]).length;
@@ -288,7 +286,7 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
                 {justFinished ? "Treino concluído com sucesso!" : "Treino de hoje já finalizado"}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Você finalizou o {todayDone.day_slug === "dia-a" ? "Dia A" : "Dia B"} hoje. Um novo
+                Você finalizou o <span className="font-semibold text-foreground">{day.label}</span> hoje. Um novo
                 treino é liberado amanhã.
               </p>
             </div>

@@ -3,27 +3,31 @@ const SUPABASE_PROJECT_URL = "https://upbkecazclnhtpncmbbr.supabase.co";
 const BUCKET_NAME = "gymio-core-exercises"; 
 
 /**
- * Função utilitária para montar a URL do Supabase Storage
- * evitando erros de formato/path
+ * Converte qualquer nome de exercício para o formato snake_case em webp
+ * Ex: "Agachamento Barra" -> "agachamento_barra.webp"
  */
-export const getMediaUrl = (fileName?: string): string | undefined => {
-  if (!fileName) return undefined;
-  // Se a string já for uma URL completa, retorna ela mesma
-  if (fileName.startsWith("http://") || fileName.startsWith("https://")) {
-    return fileName;
-  }
-  // Sanitiza o nome do arquivo garantindo que não há barras duplicadas
-  const cleanFileName = fileName.replace(/^\/+/, "");
-  return `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}/${cleanFileName}`;
+export const getExerciseMediaUrl = (name: string): string => {
+  const cleanName = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")    // Substitui caracteres especiais e espaços por "_"
+    .replace(/^_+|_+$/g, "");       // Remove "_" sobressalentes no início ou fim
+
+  return `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}/${cleanName}.webp`;
 };
 
 export type Exercise = {
   id: string;
   name: string;
-  apiName?: string;
   sets: string;
   muscle: string;
   mediaUrl?: string;
+  media?: {
+    video?: string;
+    image?: string;
+  };
+  youtubeUrl?: string;
 };
 
 export type WorkoutBlock = {
@@ -52,123 +56,69 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
 
     blocks: [
       {
-        id: "a-warmup",
-        title: "Aquecimento & Mobilidade",
-        duration: "10 min",
-        kind: "warmup",
-
-        exercises: [
-          {
-            id: "a-w1",
-            name: "Mobilidade de tornozelo e quadril + Polichinelos + Agachamento livre solo",
-            apiName: "bodyweight squat",
-            sets: "2×10",
-            muscle: "Corpo todo",
-            mediaUrl: getMediaUrl("bodyweight_squat.webp"),
-          },
-        ],
-      },
-
-      {
         id: "a-strength",
-        title: "Treino de Força Full Body",
-        duration: "50–55 min",
+        title: "Treino de Força Full Body A",
+        duration: "50–60 min",
         kind: "strength",
 
         exercises: [
           {
             id: "a-s1",
-            name: "Agachamento Livre com Barra ou Halter (ou Leg Press 45°)",
-            apiName: "barbell low bar squat",
-            sets: "4×8–10",
+            name: "Agachamento Barra",
+            sets: "3 × 6–10 (Descanso: 90–120s)",
             muscle: "Quadríceps/Glúteos",
-            mediaUrl: getMediaUrl("barbell_low_bar_squat.webp"),
+            mediaUrl: getExerciseMediaUrl("Agachamento Barra"),
           },
           {
             id: "a-s2",
-            name: "Supino Reto com Halteres",
-            apiName: "dumbbell bench press",
-            sets: "4×8–10",
-            muscle: "Peitoral",
-            mediaUrl: getMediaUrl("dumbbell_bench_press.webp"),
+            name: "Supino Inclinado com Barra",
+            sets: "3 × 8–12 (Descanso: 60–90s)",
+            muscle: "Peitoral Superior",
+            mediaUrl: getExerciseMediaUrl("Supino Inclinado com Barra"),
           },
           {
             id: "a-s3",
-            name: "Puxada Alta Frontal na Polia",
-            apiName: "cable bar lateral pulldown",
-            sets: "4×10–12",
+            name: "Remada Sentada com Cabo",
+            sets: "3 × 8–12 (Descanso: 60–90s)",
             muscle: "Costas",
-            mediaUrl: getMediaUrl("cable_bar_lateral_pulldown.webp"),
+            mediaUrl: getExerciseMediaUrl("Remada Sentada com Cabo"),
           },
           {
             id: "a-s4",
-            name: "Stiff com Halteres",
-            apiName: "dumbbell romanian deadlift",
-            sets: "3×10–12",
-            muscle: "Posterior de coxa/Glúteos",
-            mediaUrl: getMediaUrl("dumbbell_romanian_deadlift.webp"),
+            name: "Cadeira Flexora",
+            sets: "2 × 10–15 (Descanso: 60–90s)",
+            muscle: "Posterior de Coxa",
+            mediaUrl: getExerciseMediaUrl("Cadeira Flexora"),
           },
           {
             id: "a-s5",
-            name: "Desenvolvimento de Ombros com Halteres",
-            apiName: "lever shoulder press v. 3",
-            sets: "3×10–12",
+            name: "Desenvolvimento de Ombros na Máquina",
+            sets: "2 × 8–12 (Descanso: 60–90s)",
             muscle: "Ombros",
-            mediaUrl: getMediaUrl("lever_shoulder_press_v_3.webp"),
+            mediaUrl: getExerciseMediaUrl("Desenvolvimento de Ombros na Máquina"),
           },
           {
             id: "a-s6",
-            name: "Rosca Direta no Pulley / Cabo",
-            apiName: "barbell drag curl",
-            sets: "3×12–15",
-            muscle: "Bíceps",
-            mediaUrl: getMediaUrl("barbell_drag_curl.webp"),
+            name: "Extensão de Glúteo em Pé",
+            sets: "2 × 12–15/cada (Descanso: 45–60s)",
+            muscle: "Glúteos",
+            mediaUrl: getExerciseMediaUrl("Extensão de Glúteo em Pé"),
           },
           {
             id: "a-s7",
-            name: "Gêmeos em Pé",
-            apiName: "standing calf raise",
-            sets: "4×15–20",
-            muscle: "Panturrilha — máquina ou degrau com halter",
-            mediaUrl: getMediaUrl("standing_calf_raise.webp"),
-          },
-          {
-            id: "a-s8",
-            name: "Prancha Abdominal Solo",
-            apiName: "front plank",
-            sets: "3×45–60s",
-            muscle: "Core",
-            mediaUrl: getMediaUrl("front_plank.webp"),
-          },
-        ],
-      },
-
-      {
-        id: "a-metabolic",
-        title: "Bloco Metabólico",
-        duration: "15 min",
-        kind: "metabolic",
-        timer: true,
-
-        note: "HIIT: intervalos de 30s forte / 30s leve.",
-
-        exercises: [
-          {
-            id: "b-m1",
-            name: "Esteira em Inclinação ou Bicicleta Ergométrica (HIIT)",
-            apiName: "treadmill walking",
-            sets: "8–10 tiros de 30s forte / 30s leve",
-            muscle: "Cardio",
-            mediaUrl: getMediaUrl("treadmill_walking.webp"),
+            name: "Abdômen",
+            sets: "3 × 10–15 (Descanso: 45–60s)",
+            muscle: "Core / Abdômen",
+            mediaUrl: getExerciseMediaUrl("Abdômen"),
           },
         ],
       },
     ],
 
     whyItWorks: [
-      "A divisão A/B alterna o foco de braços entre os dias: no Dia A o bíceps entra como exercício direto (Rosca Direta), enquanto o tríceps trabalha de forma indireta nos supinos e desenvolvimento. No Dia B acontece o inverso — Tríceps Corda direto e bíceps recrutado nas remadas e puxadas. Assim cada músculo recebe estímulo direto e indireto ao longo da semana, sem sobreposição excessiva.",
-      "A panturrilha recebe estímulo duplo e complementar: Gêmeos em Pé (Dia A) enfatiza o gastrocnêmio com o joelho estendido, enquanto Gêmeos Sentado (Dia B) foca no sóleo, com o joelho flexionado. Trabalhar as duas posições garante desenvolvimento completo da panturrilha.",
-      "O formato full body alternado permite alta frequência semanal (cada grupo muscular estimulado 2× ou mais) com recuperação adequada entre as sessões.",
+      "Trabalho composto com agachamento livre pesado e supino inclinado focado no volume do terço superior do peitoral e pernas.",
+      "A remada sentada no cabo promove suporte lombar seguro mantendo alta sobrecarga tensional para as costas.",
+      "Volume ajustado para hipertrofia com tempos de descanso calculados por exercício.",
     ],
   },
 
@@ -179,139 +129,69 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
 
     blocks: [
       {
-        id: "b-warmup",
-        title: "Aquecimento & Mobilidade",
-        duration: "10 min",
-        kind: "warmup",
-
-        exercises: [
-          {
-            id: "b-w1",
-            name: "Mobilidade de quadril/torácica + Elevação de quadril solo",
-            apiName: "bridge",
-            sets: "2×12",
-            muscle: "Corpo todo",
-            mediaUrl: getMediaUrl("bridge.webp"),
-          },
-        ],
-      },
-
-      {
         id: "b-strength",
-        title: "Treino de Força Full Body",
-        duration: "50–55 min",
+        title: "Treino de Força Full Body B",
+        duration: "50–60 min",
         kind: "strength",
 
         exercises: [
           {
             id: "b-s1",
-            name: "Levantamento Terra RDL ou Terra Convencional",
-            apiName: "barbell romanian deadlift",
-            sets: "4×8–10",
-            muscle: "Cadeia posterior",
-            mediaUrl: getMediaUrl("barbell_romanian_deadlift.webp"),
+            name: "Agachamento na Máquina Hack",
+            sets: "3 × 8–12 (Descanso: 90–120s)",
+            muscle: "Quadríceps",
+            mediaUrl: getExerciseMediaUrl("Agachamento na Máquina Hack"),
           },
           {
             id: "b-s2",
-            name: "Remada Curvada com Barra ou Remada Baixa",
-            apiName: "barbell bent over row",
-            sets: "4×8–10",
-            muscle: "Costas",
-            mediaUrl: getMediaUrl("barbell_bent_over_row.webp"),
+            name: "Supino Reto com Halteres",
+            sets: "3 × 8–12 (Descanso: 60–90s)",
+            muscle: "Peitoral",
+            mediaUrl: getExerciseMediaUrl("Supino Reto com Halteres"),
           },
           {
             id: "b-s3",
-            name: "Supino Inclinado com Halteres",
-            apiName: "dumbbell incline bench press",
-            sets: "4×10–12",
-            muscle: "Peitoral Superior",
-            mediaUrl: getMediaUrl("dumbbell_incline_bench_press.webp"),
+            name: "Remada T com Alavanca",
+            sets: "3 × 8–12 (Descanso: 60–90s)",
+            muscle: "Costas",
+            mediaUrl: getExerciseMediaUrl("Remada T com Alavanca"),
           },
           {
             id: "b-s4",
-            name: "Cadeira Extensora",
-            apiName: "lever leg extension",
-            sets: "3×12–15",
-            muscle: "Quadríceps — movimento controlado",
-            mediaUrl: getMediaUrl("lever_leg_extension.webp"),
+            name: "Cadeira Flexora",
+            sets: "2 × 10–15 (Descanso: 60–90s)",
+            muscle: "Posterior de Coxa",
+            mediaUrl: getExerciseMediaUrl("Cadeira Flexora"),
           },
           {
             id: "b-s5",
-            name: "Elevação Lateral de Ombros",
-            apiName: "dumbbell lateral raise",
-            sets: "3×12–15",
-            muscle: "Ombros",
-            mediaUrl: getMediaUrl("dumbbell_lateral_raise.webp"),
+            name: "Desenvolvimento Lateral com Gymstick",
+            sets: "2 × 12–15 (Descanso: 45–60s)",
+            muscle: "Ombros (Deltoide Lateral)",
+            mediaUrl: getExerciseMediaUrl("Desenvolvimento Lateral com Gymstick"),
           },
           {
             id: "b-s6",
-            name: "Tríceps Corda na Polia",
-            apiName: "cable pushdown",
-            sets: "3×12–15",
-            muscle: "Tríceps",
-            mediaUrl: getMediaUrl("cable_pushdown.webp"),
+            name: "Extensão de Glúteo em Pé",
+            sets: "2 × 12–15/cada (Descanso: 45–60s)",
+            muscle: "Glúteos",
+            mediaUrl: getExerciseMediaUrl("Extensão de Glúteo em Pé"),
           },
           {
             id: "b-s7",
-            name: "Gêmeos Sentado na Máquina",
-            apiName: "lever seated calf raise",
-            sets: "4×15–20",
-            muscle: "Panturrilha — foco no sóleo",
-            mediaUrl: getMediaUrl("lever_seated_calf_raise.webp"),
-          },
-          {
-            id: "b-s8",
-            name: "Abdominal Infra no Banco / Paralela",
-            apiName: "reverse crunch",
-            sets: "3×15",
-            muscle: "Core",
-            mediaUrl: getMediaUrl("reverse_crunch.webp"),
-          },
-        ],
-      },
-
-      {
-        id: "b-metabolic",
-        title: "Bloco Metabólico",
-        duration: "15 min",
-        kind: "metabolic",
-        timer: true,
-
-        note: "Circuito de Core & Cardio — 3 rodadas. Descanse pouco entre as rodadas.",
-
-        exercises: [
-          {
-            id: "b-m1",
-            name: "Transport / Elliptical ou Remador",
-            apiName: "elliptical machine",
-            sets: "3 min acelerado",
-            muscle: "Cardio",
-            mediaUrl: getMediaUrl("elliptical_machine.webp"),
-          },
-          {
-            id: "b-m2",
-            name: "Abdominal Remador",
-            apiName: "tuck crunch",
-            sets: "15–20 reps",
-            muscle: "Core",
-            mediaUrl: getMediaUrl("tuck_crunch.webp"),
-          },
-          {
-            id: "b-m3",
-            name: "Polichinelo ou Corda",
-            apiName: "jumping jack",
-            sets: "45 seg",
-            muscle: "Cardio",
-            mediaUrl: getMediaUrl("jumping_jack.webp"),
+            name: "Abdômen",
+            sets: "3 × 10–15 (Descanso: 45–60s)",
+            muscle: "Core / Abdômen",
+            mediaUrl: getExerciseMediaUrl("Abdômen"),
           },
         ],
       },
     ],
 
     whyItWorks: [
-      "A divisão A/B alterna o foco de braços entre os dias: no Dia A o bíceps entra como exercício direto (Rosca Direta), enquanto o tríceps trabalha de forma indireta nos supinos e desenvolvimento. No Dia B acontece o inverso — Tríceps Corda direto e bíceps recrutado nas remadas e puxadas. Assim cada músculo recebe estímulo direto e indireto ao longo da semana, sem sobreposição excessiva.",
-      "A panturrilha recebe estímulo duplo e complementar: Gêmeos em Pé (Dia A) enfatiza o gastrocnêmio com o joelho estendido, enquanto Gêmeos Sentado (Dia B) foca no sóleo, com o joelho flexionado. Trabalhar as duas posições garante desenvolvimento completo da panturrilha.",
-      "O formato full body alternado permite alta frequência semanal (cada grupo muscular estimulado 2× ou mais) com recuperação adequada entre as sessões.",
+      "O Hack Squat permite maior isolamento de quadríceps com segurança guiada.",
+      "Combinação de Supino Reto com Halteres para máxima amplitude do peitoral e Desenvolvimento Lateral direcionado ao deltoide.",
+      "Trabalho focado na cadeia posterior com Cadeira Flexora e Extensão de Glúteos em Pé.",
     ],
   },
 };

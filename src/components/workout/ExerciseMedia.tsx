@@ -92,7 +92,7 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
           <div className="px-3 pb-3">
             <div
               ref={contentRef}
-              className="aspect-video w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/40 grid place-items-center"
+              className="relative aspect-video w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/40"
             >
               {open && videoId ? (
                 <iframe
@@ -101,13 +101,13 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
                   title={`Execução: ${exercise.name}`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="h-full w-full border-0"
+                  className="absolute inset-0 h-full w-full border-0"
                 />
               ) : open && thumbnailUrl ? (
                 <img
                   src={thumbnailUrl}
                   alt={`Demonstração: ${exercise.name}`}
-                  className="h-full w-full object-contain"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : open ? (
                 <div className="grid h-full w-full place-items-center text-muted-foreground">

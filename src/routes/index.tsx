@@ -11,6 +11,15 @@ type SearchParams = {
 
 const LAST_PLAN_ID_KEY = "gymio:last-plan-id";
 
+function getSavedPlanId(): string | null {
+  const localPlanId = localStorage.getItem(LAST_PLAN_ID_KEY);
+  if (localPlanId) return localPlanId;
+
+  const cookiePlanId = document.cookie
+    .match(/(?:^|;\s*)gymio_plan_id=([^;]+)/)?.[1];
+  return cookiePlanId ? decodeURIComponent(cookiePlanId) : null;
+}
+
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
     id: typeof search.id === "string" ? search.id : undefined,
@@ -30,14 +39,18 @@ function IndexPage() {
 
     if (search.id) {
       localStorage.setItem(LAST_PLAN_ID_KEY, search.id);
+      document.cookie = `gymio_plan_id=${encodeURIComponent(search.id)}; Path=/; Max-Age=31536000; SameSite=Lax`;
       setPlanId(search.id);
       return;
     }
 
-    const savedPlanId = localStorage.getItem(LAST_PLAN_ID_KEY);
+    const savedPlanId = getSavedPlanId();
     if (savedPlanId) {
       setPlanId(savedPlanId);
-      window.history.replaceState(null, "", `/?id=${encodeURIComponent(savedPlanId)}`);
+      const nextUrl = `/?id=${encodeURIComponent(savedPlanId)}`;
+      if (window.location.search !== `?id=${encodeURIComponent(savedPlanId)}`) {
+        window.location.replace(nextUrl);
+      }
     }
   }, [search.id]);
 

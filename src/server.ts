@@ -47,6 +47,19 @@ function createPlanManifest(request: Request): Response | null {
   });
 }
 
+function redirectToSavedPlan(request: Request): Response | null {
+  const url = new URL(request.url);
+  if (url.pathname !== "/" || url.searchParams.has("id")) return null;
+
+  const savedPlanId = request.headers
+    .get("cookie")
+    ?.match(/(?:^|;\s*)gymio_plan_id=([^;]+)/)?.[1];
+  if (!savedPlanId) return null;
+
+  url.searchParams.set("id", decodeURIComponent(savedPlanId));
+  return Response.redirect(url.toString(), 302);
+}
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -89,6 +102,9 @@ export default {
     try {
       const planManifest = createPlanManifest(request);
       if (planManifest) return planManifest;
+
+      const savedPlanRedirect = redirectToSavedPlan(request);
+      if (savedPlanRedirect) return savedPlanRedirect;
 
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

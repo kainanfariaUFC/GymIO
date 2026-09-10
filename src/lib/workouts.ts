@@ -1,3 +1,9 @@
+import { supabase } from "@/integrations/supabase/client";
+
+// Recupera dinamicamente a URL base do projeto Supabase
+const SUPABASE_PROJECT_URL = (supabase as any).supabaseUrl || "";
+const SUPABASE_STORAGE_URL = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/exercises`;
+
 export type Exercise = {
   id: string;
   name: string;
@@ -24,8 +30,6 @@ export type WorkoutDay = {
   blocks: WorkoutBlock[];
   whyItWorks: string[];
 };
-
-const SUPABASE_STORAGE_URL = "SUA_URL_DO_SUPABASE/storage/v1/object/public/exercises";
 
 export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
   "dia-a": {

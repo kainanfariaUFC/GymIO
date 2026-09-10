@@ -139,3 +139,8 @@ export async function updateTeacherWorkout(
 
   if (error) throw error;
 }
+
+export async function deleteTeacherWorkout(id: string) {
+  const { error } = await supabase.from("treinos").delete().eq("id", id);
+  if (error) throw error;
+}

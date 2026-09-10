@@ -15,6 +15,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import {
   createTeacherWorkout,
+  deleteTeacherWorkout,
   EXERCISES_PAGE_SIZE,
   fetchExerciseCatalog,
   fetchTeacherWorkouts,
@@ -94,6 +95,7 @@ function WorkoutList({ onCreate, onEdit }: { onCreate: () => void; onEdit: (id: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -117,6 +119,21 @@ function WorkoutList({ onCreate, onEdit }: { onCreate: () => void; onEdit: (id: 
     window.setTimeout(() => setCopiedId(null), 1800);
   }
 
+  async function removeWorkout(workout: TeacherWorkout) {
+    if (!window.confirm(`Excluir o treino de ${workout.aluno_nome}? Essa ação não pode ser desfeita.`)) return;
+    setDeletingId(workout.id);
+    setError(null);
+    try {
+      await deleteTeacherWorkout(workout.id);
+      setWorkouts((current) => current.filter((item) => item.id !== workout.id));
+      setTotal((current) => Math.max(0, current - 1));
+    } catch {
+      setError("Não foi possível excluir o treino.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
@@ -138,6 +155,7 @@ function WorkoutList({ onCreate, onEdit }: { onCreate: () => void; onEdit: (id: 
                   <a href={`/?id=${workout.id}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg border border-input px-3 text-sm font-semibold text-foreground hover:bg-muted"><Eye size={16} /> Ver treino</a>
                   <button type="button" onClick={() => onEdit(workout.id)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-input px-3 text-sm font-semibold text-foreground hover:bg-muted"><Pencil size={16} /> Editar</button>
                   <button type="button" onClick={() => copyLink(workout.id)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-input px-3 text-sm font-semibold text-foreground hover:bg-muted"><Clipboard size={16} />{copiedId === workout.id ? "Link copiado" : "Copiar link"}</button>
+                  <button type="button" onClick={() => removeWorkout(workout)} disabled={deletingId === workout.id} className="inline-flex h-10 items-center gap-2 rounded-lg border border-destructive/40 px-3 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50"><Trash2 size={16} />{deletingId === workout.id ? "Excluindo..." : "Excluir"}</button>
                 </div>
               </div>
             ))}

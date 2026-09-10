@@ -1,5 +1,5 @@
-import { ChevronDown, ExternalLink, Image as ImageIcon, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import type { Exercise } from "@/lib/workouts";
 
@@ -23,7 +23,6 @@ function getYouTubeId(url?: string): string | null {
 export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const [open, setOpen] = useState(false);
   const [imageLoadFailed, setImageLoadFailed] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   // Lê todas as fontes possíveis de mídia (dando prioridade ao novo mediaUrl do Supabase)
   const mediaUrl = exercise.mediaUrl;
@@ -38,14 +37,6 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   useEffect(() => {
     setImageLoadFailed(false);
   }, [thumbnailUrl]);
-
-  // Pausa o vídeo ao fechar o accordion removendo temporariamente o conteúdo do container
-  useEffect(() => {
-    if (open) return;
-    if (contentRef.current) {
-      contentRef.current.innerHTML = "";
-    }
-  }, [open]);
 
   // Se o exercício não tiver nenhuma mídia associada, não exibe o accordion
   if (!thumbnailUrl && !videoId) {
@@ -82,7 +73,6 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
         <div className="overflow-hidden">
           <div className="px-3 pb-3">
             <div
-              ref={contentRef}
               className="relative h-[415px] w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/40"
             >
               {open && videoId ? (
@@ -96,9 +86,11 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
                 />
               ) : open && thumbnailUrl && !imageLoadFailed ? (
                 <img
+                  key={`${thumbnailUrl}-${open}`}
                   src={thumbnailUrl}
                   alt={`Demonstração: ${exercise.name}`}
                   className="absolute inset-0 h-full w-full object-cover"
+                  decoding="async"
                   onError={() => setImageLoadFailed(true)}
                 />
               ) : open ? (

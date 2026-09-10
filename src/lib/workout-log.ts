@@ -17,25 +17,27 @@ export function todayKey(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 }
 
-export type Completion = { day_slug: string; completed_on: string };
+export type Completion = { day_slug: string; completed_on: string; workout_id?: string | null };
 
-export async function fetchCompletions(): Promise<Completion[]> {
+export async function fetchCompletions(workoutId?: string): Promise<Completion[]> {
   const deviceId = getDeviceId();
   if (!deviceId) return [];
-  const { data, error } = await supabase
+  let query = supabase
     .from("workout_completions")
-    .select("day_slug, completed_on")
+    .select("day_slug, completed_on, workout_id")
     .eq("device_id", deviceId)
     .order("completed_on", { ascending: false })
     .limit(120);
+  if (workoutId) query = query.eq("workout_id", workoutId);
+  const { data, error } = await query;
   if (error) throw error;
   return data ?? [];
 }
 
-export async function finishWorkout(daySlug: string): Promise<Completion> {
+export async function finishWorkout(daySlug: string, workoutId: string): Promise<Completion> {
   const deviceId = getDeviceId();
-  const row = { device_id: deviceId, day_slug: daySlug, completed_on: todayKey() };
+  const row = { device_id: deviceId, day_slug: daySlug, workout_id: workoutId, completed_on: todayKey() };
   const { error } = await supabase.from("workout_completions").insert(row);
   if (error && error.code !== "23505") throw error;
-  return { day_slug: daySlug, completed_on: row.completed_on };
+  return { day_slug: daySlug, workout_id: workoutId, completed_on: row.completed_on };
 }

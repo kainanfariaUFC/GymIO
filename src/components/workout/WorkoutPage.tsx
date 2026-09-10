@@ -186,7 +186,7 @@ function BlockCard({
   );
 }
 
-export function WorkoutPage({ day, alunoNome }: { day: WorkoutDay; alunoNome: string }) {
+export function WorkoutPage({ day, alunoNome, workoutId }: { day: WorkoutDay; alunoNome: string; workoutId: string }) {
   const { checked, toggle, reset } = useSessionChecks(`treino:${day.slug}`);
 
   const allExercises = useMemo(() => day.blocks.flatMap((b) => b.exercises), [day]);
@@ -202,14 +202,14 @@ export function WorkoutPage({ day, alunoNome }: { day: WorkoutDay; alunoNome: st
   useEffect(() => {
     let active = true;
     setLoadingHistory(true);
-    fetchCompletions()
+    fetchCompletions(workoutId)
       .then((rows) => active && setCompletions(rows))
       .catch(() => active && setError("Não foi possível carregar seu histórico."))
       .finally(() => active && setLoadingHistory(false));
     return () => {
       active = false;
     };
-  }, []);
+  }, [workoutId]);
 
   const today = todayKey();
   const todayDone = completions.find((c) => c.completed_on === today);
@@ -218,7 +218,7 @@ export function WorkoutPage({ day, alunoNome }: { day: WorkoutDay; alunoNome: st
     setSaving(true);
     setError(null);
     try {
-      const row = await finishWorkout(day.slug);
+      const row = await finishWorkout(day.slug, workoutId);
       setCompletions((prev) =>
         prev.some((c) => c.completed_on === row.completed_on) ? prev : [row, ...prev],
       );

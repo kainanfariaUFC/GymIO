@@ -4,10 +4,7 @@ export type Exercise = {
   apiName?: string;
   sets: string;
   muscle: string;
-  media?: {
-    video?: string;
-    image?: string;
-  };
+  mediaUrl?: string;
 };
 
 export type WorkoutBlock = {
@@ -27,6 +24,8 @@ export type WorkoutDay = {
   blocks: WorkoutBlock[];
   whyItWorks: string[];
 };
+
+const SUPABASE_STORAGE_URL = "SUA_URL_DO_SUPABASE/storage/v1/object/public/exercises";
 
 export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
   "dia-a": {
@@ -48,9 +47,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "bodyweight squat",
             sets: "2×10",
             muscle: "Corpo todo",
-            media: {
-              video: "https://www.youtube.com/watch?v=aclHkVaku9U",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/bodyweight_squat.webp`,
           },
         ],
       },
@@ -68,9 +65,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "barbell low bar squat",
             sets: "4×8–10",
             muscle: "Quadríceps/Glúteos",
-            media: {
-              video: "https://www.youtube.com/shorts/36dUhmurrz8",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/barbell_low_bar_squat.webp`,
           },
           {
             id: "a-s2",
@@ -78,9 +73,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "dumbbell bench press",
             sets: "4×8–10",
             muscle: "Peitoral",
-            media: {
-              video: "https://www.youtube.com/shorts/xbw0fC8-0m0",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/dumbbell_bench_press.webp`,
           },
           {
             id: "a-s3",
@@ -88,9 +81,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "cable bar lateral pulldown",
             sets: "4×10–12",
             muscle: "Costas",
-            media: {
-              video: "https://www.youtube.com/shorts/dZqL3bSeVc8",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/cable_bar_lateral_pulldown.webp`,
           },
           {
             id: "a-s4",
@@ -98,9 +89,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "dumbbell romanian deadlift",
             sets: "3×10–12",
             muscle: "Posterior de coxa/Glúteos",
-            media: {
-              video: "https://www.youtube.com/shorts/SRVkwwXk7I4",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/dumbbell_romanian_deadlift.webp`,
           },
           {
             id: "a-s5",
@@ -108,9 +97,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "lever shoulder press v. 3",
             sets: "3×10–12",
             muscle: "Ombros",
-            media: {
-              video: "https://www.youtube.com/shorts/5I7ogOjvdnc", 
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/lever_shoulder_press_v_3.webp`,
           },
           {
             id: "a-s6",
@@ -118,9 +105,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "barbell drag curl",
             sets: "3×12–15",
             muscle: "Bíceps",
-            media: {
-              video: "https://www.youtube.com/shorts/x6JCKfdzPJE",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/barbell_drag_curl.webp`,
           },
           {
             id: "a-s7",
@@ -128,9 +113,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "standing calf raise",
             sets: "4×15–20",
             muscle: "Panturrilha — máquina ou degrau com halter",
-            media: {
-              video: "https://www.youtube.com/shorts/Pr-CRPhTTqk",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/standing_calf_raise.webp`,
           },
           {
             id: "a-s8",
@@ -138,9 +121,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "front plank",
             sets: "3×45–60s",
             muscle: "Core",
-            media: {
-              video: "https://www.youtube.com/shorts/yZaYCfWS3mQ",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/front_plank.webp`,
           },
         ],
       },
@@ -161,9 +142,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "treadmill walking",
             sets: "8–10 tiros de 30s forte / 30s leve",
             muscle: "Cardio",
-            media: {
-              video: "https://www.youtube.com/watch?v=sI32xX1Uf2Y",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/treadmill_walking.webp`,
           },
         ],
       },
@@ -195,9 +174,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "bridge",
             sets: "2×12",
             muscle: "Corpo todo",
-            media: {
-              video: "https://www.youtube.com/watch?v=13wS8bYtJlg",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/bridge.webp`,
           },
         ],
       },
@@ -215,9 +192,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "barbell romanian deadlift",
             sets: "4×8–10",
             muscle: "Cadeia posterior",
-            media: {
-              video: "https://www.youtube.com/shorts/M-fcN6gyknM",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/barbell_romanian_deadlift.webp`,
           },
           {
             id: "b-s2",
@@ -225,9 +200,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "barbell bent over row",
             sets: "4×8–10",
             muscle: "Costas",
-            media: {
-              video: "https://www.youtube.com/shorts/WhjZWM-btqQ",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/barbell_bent_over_row.webp`,
           },
           {
             id: "b-s3",
@@ -235,9 +208,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "dumbbell incline bench press",
             sets: "4×10–12",
             muscle: "Peitoral Superior",
-            media: {
-              video: "https://www.youtube.com/shorts/ZKMUdqpeKiU",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/dumbbell_incline_bench_press.webp`,
           },
           {
             id: "b-s4",
@@ -245,9 +216,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "lever leg extension",
             sets: "3×12–15",
             muscle: "Quadríceps — movimento controlledo",
-            media: {
-              video: "https://www.youtube.com/shorts/0vgpn8EVX6A",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/lever_leg_extension.webp`,
           },
           {
             id: "b-s5",
@@ -255,9 +224,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "dumbbell lateral raise",
             sets: "3×12–15",
             muscle: "Ombros",
-            media: {
-              video: "https://www.youtube.com/shorts/ot9nwSC1JnA",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/dumbbell_lateral_raise.webp`,
           },
           {
             id: "b-s6",
@@ -265,9 +232,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "cable pushdown",
             sets: "3×12–15",
             muscle: "Tríceps",
-            media: {
-              video: "https://www.youtube.com/shorts/-QGC1cL6ETE",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/cable_pushdown.webp`,
           },
           {
             id: "b-s7",
@@ -275,9 +240,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "lever seated calf raise",
             sets: "4×15–20",
             muscle: "Panturrilha — foco no sóleo",
-            media: {
-              video: "https://www.youtube.com/shorts/pBbSiqu7Trk",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/lever_seated_calf_raise.webp`,
           },
           {
             id: "b-s8",
@@ -285,9 +248,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "reverse crunch",
             sets: "3×15",
             muscle: "Core",
-            media: {
-              video: "https://www.youtube.com/shorts/vmqDIz3dVK4",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/reverse_crunch.webp`,
           },
         ],
       },
@@ -308,9 +269,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "elliptical machine",
             sets: "3 min acelerado",
             muscle: "Cardio",
-            media: {
-              video: "https://www.youtube.com/watch?v=9I_V9Y0x0Q0",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/elliptical_machine.webp`,
           },
           {
             id: "b-m2",
@@ -318,9 +277,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "tuck crunch",
             sets: "15–20 reps",
             muscle: "Core",
-            media: {
-              video: "https://www.youtube.com/watch?v=8V-J-C_10-0",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/tuck_crunch.webp`,
           },
           {
             id: "b-m3",
@@ -328,9 +285,7 @@ export const workouts: Record<"dia-a" | "dia-b", WorkoutDay> = {
             apiName: "jumping jack",
             sets: "45 seg",
             muscle: "Cardio",
-            media: {
-              video: "https://www.youtube.com/watch?v=iSSAk4XCsRA",
-            },
+            mediaUrl: `${SUPABASE_STORAGE_URL}/jumping_jack.webp`,
           },
         ],
       },

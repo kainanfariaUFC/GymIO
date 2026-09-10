@@ -7,6 +7,46 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+function createPlanManifest(request: Request): Response | null {
+  const url = new URL(request.url);
+  const planId = url.searchParams.get("id");
+  if (url.pathname !== "/manifest.webmanifest" || !planId) return null;
+
+  const manifest = {
+    name: "Minha Rotina de Treino com GymIO",
+    short_name: "GymIO",
+    description: "Acompanhe sua rotina semanal de treino.",
+    start_url: `/?id=${encodeURIComponent(planId)}`,
+    display: "standalone",
+    background_color: "#F2EDE4",
+    theme_color: "#A9C4D9",
+    orientation: "portrait",
+    scope: "/",
+    lang: "pt-BR",
+    icons: [
+      {
+        src: "/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any maskable",
+      },
+      {
+        src: "/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any maskable",
+      },
+    ],
+  };
+
+  return new Response(JSON.stringify(manifest), {
+    headers: {
+      "cache-control": "no-store",
+      "content-type": "application/manifest+json; charset=utf-8",
+    },
+  });
+}
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -47,6 +87,9 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const planManifest = createPlanManifest(request);
+      if (planManifest) return planManifest;
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

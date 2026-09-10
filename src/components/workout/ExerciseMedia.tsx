@@ -1,6 +1,6 @@
 // Configuração do Supabase Storage
 const SUPABASE_PROJECT_URL = "https://upbkecazclnhtpncmbbr.supabase.co";
-const BUCKET_NAME = "gymio-core-exercises"; 
+const BUCKET_NAME = "gymio-core-exercises";
 
 /**
  * Converte qualquer nome de exercício para o formato snake_case em webp

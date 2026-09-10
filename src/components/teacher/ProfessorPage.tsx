@@ -107,7 +107,7 @@ function WorkoutList({ onCreate }: { onCreate: () => void }) {
   }, [page, pageSize]);
 
   async function copyLink(id: string) {
-    await navigator.clipboard.writeText(`${window.location.origin}/aluno?id=${id}`);
+    await navigator.clipboard.writeText(`${window.location.origin}/?id=${id}`);
     setCopiedId(id);
     window.setTimeout(() => setCopiedId(null), 1800);
   }

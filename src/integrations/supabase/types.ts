@@ -14,27 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
-      exercises: {
+      exercicios: {
         Row: {
           created_at: string
           id: string
-          media_url: string | null
-          muscle_group: string
-          name: string
+          media_url: string
+          nome: string
         }
         Insert: {
           created_at?: string
           id?: string
-          media_url?: string | null
-          muscle_group?: string
-          name: string
+          media_url: string
+          nome: string
         }
         Update: {
           created_at?: string
           id?: string
-          media_url?: string | null
-          muscle_group?: string
-          name?: string
+          media_url?: string
+          nome?: string
         }
         Relationships: []
       }

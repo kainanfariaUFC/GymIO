@@ -49,18 +49,26 @@ export async function fetchExerciseCatalog(page: number, search: string) {
   const from = page * EXERCISES_PAGE_SIZE;
   const to = from + EXERCISES_PAGE_SIZE - 1;
   let query = supabase
-    .from("exercises")
-    .select("id, name, media_url, muscle_group", { count: "exact" })
-    .order("name", { ascending: true })
+    .from("exercicios")
+    .select("id, nome, media_url", { count: "exact" })
+    .order("nome", { ascending: true })
     .range(from, to);
 
   if (search.trim()) {
-    query = query.ilike("name", `%${search.trim()}%`);
+    query = query.ilike("nome", `%${search.trim()}%`);
   }
 
   const { data, error, count } = await query;
   if (error) throw error;
-  return { exercises: (data ?? []) as CatalogExercise[], total: count ?? 0 };
+  return {
+    exercises: (data ?? []).map((exercise) => ({
+      id: exercise.id,
+      name: exercise.nome,
+      media_url: exercise.media_url,
+      muscle_group: "Geral",
+    })),
+    total: count ?? 0,
+  };
 }
 
 export async function createTeacherWorkout(

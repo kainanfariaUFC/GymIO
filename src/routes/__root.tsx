@@ -7,7 +7,6 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { Dumbbell } from "lucide-react";
 
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { ThemeToggle, themeInitScript } from "@/components/ThemeToggle";
@@ -81,17 +80,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Minha Rotina de Treino — Full Body A/B" },
+      { title: "Minha Rotina de Treino — Dinâmica" },
       {
         name: "description",
         content:
-          "Acompanhe sua rotina semanal de treino full body (Dia A e Dia B): força, metabólico e progresso marcado na hora, direto do celular.",
+          "Acompanhe sua rotina semanal de treino personalizada: força, metabólico e progresso marcado na hora, direto do celular.",
       },
-      { property: "og:title", content: "Minha Rotina de Treino — Full Body A/B" },
+      { property: "og:title", content: "Minha Rotina de Treino" },
       {
         property: "og:description",
         content:
-          "Acompanhe sua rotina semanal de treino full body (Dia A e Dia B), com checkboxes e cronômetro embutido.",
+          "Acompanhe sua rotina de treino personalizada com checkboxes e cronômetro embutido.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -134,46 +133,14 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function BottomNav() {
-  const tabs = [
-    { to: "/dia-a" as const, label: "Dia A" },
-    { to: "/dia-b" as const, label: "Dia B" },
-  ];
-
-  return (
-    <nav
-      aria-label="Dias de treino"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
-    >
-      <div className="mx-auto grid max-w-xl grid-cols-2 gap-2 px-4 py-2.5">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.to}
-            to={tab.to}
-            aria-label={`Ir para o treino ${tab.label}`}
-            className="flex min-h-14 items-center justify-center gap-2 rounded-2xl text-base font-bold text-muted-foreground transition-colors"
-            activeOptions={{ exact: true }}
-            activeProps={{ className: "bg-primary/25 text-primary-foreground" }}
-          >
-            <Dumbbell size={20} aria-hidden />
-            {tab.label}
-          </Link>
-        ))}
-      </div>
-    </nav>
-  );
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ThemeToggle />
       <InstallPrompt />
       <Outlet />
-      <BottomNav />
     </QueryClientProvider>
   );
 }

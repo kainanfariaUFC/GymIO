@@ -22,6 +22,7 @@ function getYouTubeId(url?: string): string | null {
 
 export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const [open, setOpen] = useState(false);
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Lê todas as fontes possíveis de mídia (dando prioridade ao novo mediaUrl do Supabase)
@@ -33,6 +34,10 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const thumbnailUrl = videoId
     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
     : mediaUrl || exercise.media?.image;
+
+  useEffect(() => {
+    setImageLoadFailed(false);
+  }, [thumbnailUrl]);
 
   // Pausa o vídeo ao fechar o accordion removendo temporariamente o conteúdo do container
   useEffect(() => {
@@ -89,15 +94,16 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
                   allowFullScreen
                   className="absolute inset-0 h-full w-full border-0"
                 />
-              ) : open && thumbnailUrl ? (
+              ) : open && thumbnailUrl && !imageLoadFailed ? (
                 <img
                   src={thumbnailUrl}
                   alt={`Demonstração: ${exercise.name}`}
                   className="absolute inset-0 h-full w-full object-cover"
+                  onError={() => setImageLoadFailed(true)}
                 />
               ) : open ? (
-                <div className="grid h-full w-full place-items-center text-muted-foreground">
-                  <ImageIcon size={24} />
+                <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm font-semibold text-muted-foreground">
+                  {imageLoadFailed ? "Sem prévia disponível" : <ImageIcon size={24} />}
                 </div>
               ) : null}
             </div>

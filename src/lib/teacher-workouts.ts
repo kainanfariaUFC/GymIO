@@ -30,7 +30,6 @@ export type TeacherWorkout = {
   id: string;
   aluno_nome: string;
   created_at: string;
-  updated_at: string;
 };
 
 export async function fetchTeacherWorkouts(page: number, pageSize: number) {
@@ -38,7 +37,7 @@ export async function fetchTeacherWorkouts(page: number, pageSize: number) {
   const to = from + pageSize - 1;
   const { data, error, count } = await supabase
     .from("treinos")
-    .select("id, aluno_nome, created_at, updated_at", { count: "exact" })
+    .select("id, aluno_nome, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
 

@@ -56,20 +56,6 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
         aria-label={`${open ? "Ocultar" : "Ver"} execução: ${exercise.name}`}
         className="flex min-h-11 w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-muted/80 active:bg-muted/80"
       >
-        <span className="relative h-9 w-12 shrink-0 overflow-hidden rounded-xl bg-card">
-          {thumbnailUrl ? (
-            <img
-              src={thumbnailUrl}
-              alt={`Execução: ${exercise.name}`}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="grid h-full w-full place-items-center">
-              <Play size={16} className="text-muted-foreground" />
-            </span>
-          )}
-        </span>
-
         <span className="min-w-0 flex-1 text-sm font-bold text-muted-foreground">
           Ver execução
         </span>

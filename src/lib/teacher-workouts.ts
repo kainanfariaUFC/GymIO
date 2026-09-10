@@ -26,10 +26,16 @@ export type WorkoutSectionDraft = {
   exercises: WorkoutExerciseDraft[];
 };
 
+export type WorkoutDayDraft = {
+  label: string;
+  sections: WorkoutSectionDraft[];
+};
+
 export type TeacherWorkout = {
   id: string;
   aluno_nome: string;
   created_at: string;
+  dias?: Json;
 };
 
 export async function fetchTeacherWorkouts(page: number, pageSize: number) {
@@ -43,6 +49,17 @@ export async function fetchTeacherWorkouts(page: number, pageSize: number) {
 
   if (error) throw error;
   return { workouts: (data ?? []) as TeacherWorkout[], total: count ?? 0 };
+}
+
+export async function fetchTeacherWorkoutById(id: string) {
+  const { data, error } = await supabase
+    .from("treinos")
+    .select("id, aluno_nome, dias")
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+  return data as TeacherWorkout;
 }
 
 export async function fetchExerciseCatalog(page: number, search: string) {
@@ -73,24 +90,22 @@ export async function fetchExerciseCatalog(page: number, search: string) {
 
 export async function createTeacherWorkout(
   alunoNome: string,
-  sections: WorkoutSectionDraft[],
+  days: WorkoutDayDraft[],
 ) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
     throw userError ?? new Error("Sessão do professor não encontrada.");
   }
 
-  const dias = [
-    {
-      slug: "treino-1",
-      label: "Treino",
-      headline: "Treino personalizado",
-      whyItWorks: [],
-      forca: sections.find((section) => section.slug === "forca")?.exercises,
-      mobilidade: sections.find((section) => section.slug === "mobilidade")?.exercises,
-      metabolico: sections.find((section) => section.slug === "metabolico")?.exercises,
-    },
-  ] as unknown as Json;
+  const dias = days.map((day, dayIndex) => ({
+    slug: `dia-${String.fromCharCode(97 + dayIndex)}`,
+    label: day.label,
+    headline: `Treino ${day.label}`,
+    whyItWorks: [],
+    forca: day.sections.find((section) => section.slug === "forca")?.exercises,
+    mobilidade: day.sections.find((section) => section.slug === "mobilidade")?.exercises,
+    metabolico: day.sections.find((section) => section.slug === "metabolico")?.exercises,
+  })) as unknown as Json;
 
   const { data, error } = await supabase
     .from("treinos")
@@ -100,4 +115,27 @@ export async function createTeacherWorkout(
 
   if (error) throw error;
   return data.id;
+}
+
+export async function updateTeacherWorkout(
+  id: string,
+  alunoNome: string,
+  days: WorkoutDayDraft[],
+) {
+  const dias = days.map((day, dayIndex) => ({
+    slug: `dia-${String.fromCharCode(97 + dayIndex)}`,
+    label: day.label,
+    headline: `Treino ${day.label}`,
+    whyItWorks: [],
+    forca: day.sections.find((section) => section.slug === "forca")?.exercises,
+    mobilidade: day.sections.find((section) => section.slug === "mobilidade")?.exercises,
+    metabolico: day.sections.find((section) => section.slug === "metabolico")?.exercises,
+  })) as unknown as Json;
+
+  const { error } = await supabase
+    .from("treinos")
+    .update({ aluno_nome: alunoNome.trim(), dias })
+    .eq("id", id);
+
+  if (error) throw error;
 }

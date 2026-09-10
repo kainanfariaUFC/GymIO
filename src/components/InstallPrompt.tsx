@@ -13,6 +13,7 @@ export function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -27,6 +28,7 @@ export function InstallPrompt() {
     }
 
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true);
+    setIsMobile(/Android|iPhone|iPad|iPod|Mobile/i.test(window.navigator.userAgent));
     setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
 
     const isIOSDevice = /iPad|iPhone|iPod/.test(window.navigator.userAgent) && !(window as any).MSStream;
@@ -43,7 +45,7 @@ export function InstallPrompt() {
     };
   }, []);
 
-  if (isStandalone || dismissed || (!deferredPrompt && !isIOS)) {
+  if (!isMobile || isStandalone || dismissed || (!deferredPrompt && !isIOS)) {
     return null;
   }
 

@@ -1,7 +1,9 @@
 import {
   Check,
   Clipboard,
+  Eye,
   LogOut,
+  Pencil,
   Plus,
   Search,
   Trash2,
@@ -16,9 +18,12 @@ import {
   EXERCISES_PAGE_SIZE,
   fetchExerciseCatalog,
   fetchTeacherWorkouts,
+  fetchTeacherWorkoutById,
+  updateTeacherWorkout,
   type CatalogExercise,
   type TeacherWorkout,
   type WorkoutExerciseDraft,
+  type WorkoutDayDraft,
   type WorkoutSectionDraft,
 } from "@/lib/teacher-workouts";
 
@@ -81,7 +86,7 @@ function AuthPanel({ onAuthenticated }: { onAuthenticated: (session: Session) =>
   );
 }
 
-function WorkoutList({ onCreate }: { onCreate: () => void }) {
+function WorkoutList({ onCreate, onEdit }: { onCreate: () => void; onEdit: (id: string) => void }) {
   const [workouts, setWorkouts] = useState<TeacherWorkout[]>([]);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -129,7 +134,11 @@ function WorkoutList({ onCreate }: { onCreate: () => void }) {
             {workouts.map((workout) => (
               <div key={workout.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
                 <div><p className="font-bold text-foreground">{workout.aluno_nome}</p><p className="mt-1 text-xs text-muted-foreground">Criado em {new Date(workout.created_at).toLocaleDateString("pt-BR")}</p></div>
-                <button type="button" onClick={() => copyLink(workout.id)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-input px-3 text-sm font-semibold text-foreground hover:bg-muted"><Clipboard size={16} />{copiedId === workout.id ? "Link copiado" : "Copiar link"}</button>
+                <div className="flex flex-wrap gap-2">
+                  <a href={`/?id=${workout.id}`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg border border-input px-3 text-sm font-semibold text-foreground hover:bg-muted"><Eye size={16} /> Ver treino</a>
+                  <button type="button" onClick={() => onEdit(workout.id)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-input px-3 text-sm font-semibold text-foreground hover:bg-muted"><Pencil size={16} /> Editar</button>
+                  <button type="button" onClick={() => copyLink(workout.id)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-input px-3 text-sm font-semibold text-foreground hover:bg-muted"><Clipboard size={16} />{copiedId === workout.id ? "Link copiado" : "Copiar link"}</button>
+                </div>
               </div>
             ))}
           </div>
@@ -144,9 +153,39 @@ function WorkoutList({ onCreate }: { onCreate: () => void }) {
   );
 }
 
-function WorkoutForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () => void }) {
+function hydrateDays(value: unknown): { label: string; sections: SectionState }[] {
+  if (!Array.isArray(value) || value.length === 0) return [{ label: "Dia A", sections: emptySections() }];
+
+  return value.map((rawDay, dayIndex) => {
+    const day = (rawDay ?? {}) as Record<string, unknown>;
+    const sections = emptySections();
+    (Object.keys(sectionInfo) as SectionKey[]).forEach((key) => {
+      const rawExercises = Array.isArray(day[key]) ? day[key] : [];
+      sections[key] = {
+        enabled: key === "forca" || rawExercises.length > 0,
+        exercises: rawExercises.map((rawExercise) => {
+          const exercise = (rawExercise ?? {}) as Record<string, unknown>;
+          return {
+            exerciseId: String(exercise.exerciseId ?? exercise.id ?? `${key}-${dayIndex}-${Math.random()}`),
+            name: String(exercise.name ?? "Exercício"),
+            muscle: String(exercise.muscle ?? "Geral"),
+            mediaUrl: typeof exercise.mediaUrl === "string" ? exercise.mediaUrl : undefined,
+            sets: String(exercise.sets ?? "3 x 10"),
+            rest: String(exercise.rest ?? "60s"),
+          };
+        }),
+      };
+    });
+    return { label: String(day.label ?? `Dia ${String.fromCharCode(65 + dayIndex)}`), sections };
+  });
+}
+
+function WorkoutForm({ workoutId, onSaved, onCancel }: { workoutId?: string; onSaved: () => void; onCancel: () => void }) {
   const [alunoNome, setAlunoNome] = useState("");
-  const [sections, setSections] = useState<SectionState>(emptySections);
+  const [days, setDays] = useState<{ label: string; sections: SectionState }[]>([
+    { label: "Dia A", sections: emptySections() },
+  ]);
+  const [activeDay, setActiveDay] = useState(0);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [catalog, setCatalog] = useState<CatalogExercise[]>([]);
@@ -154,7 +193,40 @@ function WorkoutForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () 
   const [catalogPage, setCatalogPage] = useState(0);
   const [loadingCatalog, setLoadingCatalog] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadingWorkout, setLoadingWorkout] = useState(Boolean(workoutId));
   const [error, setError] = useState<string | null>(null);
+  const sections = days[activeDay].sections;
+
+  useEffect(() => {
+    if (!workoutId) return;
+    let active = true;
+    setLoadingWorkout(true);
+    fetchTeacherWorkoutById(workoutId)
+      .then((workout) => {
+        if (!active) return;
+        setAlunoNome(workout.aluno_nome);
+        setDays(hydrateDays(workout.dias));
+        setActiveDay(0);
+      })
+      .catch(() => active && setError("Não foi possível carregar o treino para edição."))
+      .finally(() => active && setLoadingWorkout(false));
+    return () => { active = false; };
+  }, [workoutId]);
+
+  function updateActiveSections(updater: (current: SectionState) => SectionState) {
+    setDays((current) => current.map((day, index) => index === activeDay ? { ...day, sections: updater(day.sections) } : day));
+  }
+
+  function addDay() {
+    setDays((current) => [...current, { label: `Dia ${String.fromCharCode(65 + current.length)}`, sections: emptySections() }]);
+    setActiveDay(days.length);
+  }
+
+  function removeDay() {
+    if (days.length === 1) return;
+    setDays((current) => current.filter((_, index) => index !== activeDay));
+    setActiveDay((current) => Math.max(0, Math.min(current - 1, days.length - 2)));
+  }
 
   useEffect(() => {
     setCatalogPage(0);
@@ -171,28 +243,37 @@ function WorkoutForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () 
   }, [catalogPage, deferredSearch]);
 
   function addExercise(exercise: CatalogExercise, section: SectionKey) {
-    setSections((current) => {
+    updateActiveSections((current) => {
       if (current[section].exercises.some((item) => item.exerciseId === exercise.id)) return current;
       return { ...current, [section]: { ...current[section], enabled: true, exercises: [...current[section].exercises, { exerciseId: exercise.id, name: exercise.name, muscle: exercise.muscle_group, mediaUrl: exercise.media_url ?? undefined, sets: "3 x 10", rest: "60s" }] } };
     });
   }
 
   function updateExercise(section: SectionKey, exerciseId: string, field: "sets" | "rest", value: string) {
-    setSections((current) => ({ ...current, [section]: { ...current[section], exercises: current[section].exercises.map((item) => item.exerciseId === exerciseId ? { ...item, [field]: value } : item) } }));
+    updateActiveSections((current) => ({ ...current, [section]: { ...current[section], exercises: current[section].exercises.map((item) => item.exerciseId === exerciseId ? { ...item, [field]: value } : item) } }));
   }
 
   function removeExercise(section: SectionKey, exerciseId: string) {
-    setSections((current) => ({ ...current, [section]: { ...current[section], exercises: current[section].exercises.filter((item) => item.exerciseId !== exerciseId) } }));
+    updateActiveSections((current) => ({ ...current, [section]: { ...current[section], exercises: current[section].exercises.filter((item) => item.exerciseId !== exerciseId) } }));
   }
 
   async function saveWorkout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const activeSections = (Object.keys(sectionInfo) as SectionKey[]).filter((key) => sections[key].enabled);
-    if (!alunoNome.trim() || sections.forca.exercises.length === 0) { setError("Informe o nome do aluno e adicione pelo menos um exercício de força."); return; }
+    const invalidDay = days.find((day) => day.sections.forca.exercises.length === 0);
+    if (!alunoNome.trim() || invalidDay) { setError("Informe o nome do aluno e adicione pelo menos um exercício de força em cada dia."); return; }
     setSaving(true); setError(null);
     try {
-      const payload: WorkoutSectionDraft[] = activeSections.map((key) => ({ slug: key, label: sectionInfo[key].label, headline: sectionInfo[key].headline, exercises: sections[key].exercises }));
-      await createTeacherWorkout(alunoNome, payload);
+      const payload: WorkoutDayDraft[] = days.map((day) => ({
+        label: day.label,
+        sections: (Object.keys(sectionInfo) as SectionKey[])
+          .filter((key) => day.sections[key].enabled)
+          .map((key) => ({ slug: key, label: sectionInfo[key].label, headline: sectionInfo[key].headline, exercises: day.sections[key].exercises })),
+      }));
+      if (workoutId) {
+        await updateTeacherWorkout(workoutId, alunoNome, payload);
+      } else {
+        await createTeacherWorkout(alunoNome, payload);
+      }
       onSaved();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Não foi possível salvar o treino.");
@@ -203,18 +284,24 @@ function WorkoutForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () 
 
   return (
     <form onSubmit={saveWorkout}>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Novo plano</p><h1 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">Montar treino</h1></div><button type="button" onClick={onCancel} className="rounded-xl border border-input px-4 py-2 text-sm font-bold">Cancelar</button></div>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{workoutId ? "Editar plano" : "Novo plano"}</p><h1 className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">{workoutId ? "Editar treino" : "Montar treino"}</h1></div><button type="button" onClick={onCancel} className="rounded-xl border border-input px-4 py-2 text-sm font-bold">Cancelar</button></div>
+      {loadingWorkout && <p className="mb-4 rounded-xl bg-muted p-3 text-sm text-muted-foreground">Carregando treino...</p>}
       <label className="block rounded-2xl bg-card p-5 shadow-soft text-sm font-bold">Nome do aluno<input value={alunoNome} onChange={(event) => setAlunoNome(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring" required /></label>
+      <div className="mt-5 flex flex-wrap items-center gap-2 rounded-2xl bg-card p-3 shadow-soft">
+        {days.map((day, index) => <button key={day.label} type="button" onClick={() => setActiveDay(index)} className={`rounded-xl px-4 py-2 text-sm font-bold ${index === activeDay ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{day.label}</button>)}
+        <button type="button" onClick={addDay} className="inline-flex items-center gap-1 rounded-xl border border-dashed border-input px-3 py-2 text-sm font-bold"><Plus size={16} /> Adicionar dia</button>
+        {days.length > 1 && <button type="button" onClick={removeDay} className="ml-auto inline-flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-destructive"><Trash2 size={16} /> Remover {days[activeDay].label}</button>}
+      </div>
       <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_1.2fr]">
         <div className="space-y-4">
           {(Object.keys(sectionInfo) as SectionKey[]).map((key) => (
-            <section key={key} className="rounded-2xl bg-card p-4 shadow-soft"><div className="flex items-center justify-between gap-3"><h2 className="font-bold text-foreground">{sectionInfo[key].label}{key === "forca" && <span className="ml-2 text-xs font-semibold text-destructive">obrigatório</span>}</h2>{key !== "forca" && <input type="checkbox" checked={sections[key].enabled} onChange={(event) => setSections((current) => ({ ...current, [key]: { ...current[key], enabled: event.target.checked } }))} className="h-5 w-5 accent-primary" />}</div>{sections[key].enabled && <div className="mt-4 space-y-3">{sections[key].exercises.length === 0 ? <p className="text-sm text-muted-foreground">Adicione exercícios pelo catálogo.</p> : sections[key].exercises.map((exercise) => <div key={exercise.exerciseId} className="rounded-xl border border-border p-3"><div className="flex items-start justify-between gap-2"><p className="text-sm font-semibold text-foreground">{exercise.name}</p><button type="button" onClick={() => removeExercise(key, exercise.exerciseId)} aria-label={`Remover ${exercise.name}`} className="text-muted-foreground hover:text-destructive"><Trash2 size={16} /></button></div><div className="mt-3 grid grid-cols-2 gap-2"><label className="text-xs font-semibold text-muted-foreground">Repetições<input value={exercise.sets} onChange={(event) => updateExercise(key, exercise.exerciseId, "sets", event.target.value)} className="mt-1 h-9 w-full rounded-lg border border-input bg-background px-2 text-sm text-foreground" /></label><label className="text-xs font-semibold text-muted-foreground">Descanso<input value={exercise.rest} onChange={(event) => updateExercise(key, exercise.exerciseId, "rest", event.target.value)} className="mt-1 h-9 w-full rounded-lg border border-input bg-background px-2 text-sm text-foreground" /></label></div></div>)}</div>}</section>
+            <section key={key} className="rounded-2xl bg-card p-4 shadow-soft"><div className="flex items-center justify-between gap-3"><h2 className="font-bold text-foreground">{sectionInfo[key].label}{key === "forca" && <span className="ml-2 text-xs font-semibold text-destructive">obrigatório</span>}</h2>{key !== "forca" && <input type="checkbox" checked={sections[key].enabled} onChange={(event) => updateActiveSections((current) => ({ ...current, [key]: { ...current[key], enabled: event.target.checked } }))} className="h-5 w-5 accent-primary" />}</div>{sections[key].enabled && <div className="mt-4 space-y-3">{sections[key].exercises.length === 0 ? <p className="text-sm text-muted-foreground">Adicione exercícios pelo catálogo.</p> : sections[key].exercises.map((exercise) => <div key={exercise.exerciseId} className="rounded-xl border border-border p-3"><div className="flex items-start justify-between gap-2"><p className="text-sm font-semibold text-foreground">{exercise.name}</p><button type="button" onClick={() => removeExercise(key, exercise.exerciseId)} aria-label={`Remover ${exercise.name}`} className="text-muted-foreground hover:text-destructive"><Trash2 size={16} /></button></div><div className="mt-3 grid grid-cols-2 gap-2"><label className="text-xs font-semibold text-muted-foreground">Repetições<input value={exercise.sets} onChange={(event) => updateExercise(key, exercise.exerciseId, "sets", event.target.value)} className="mt-1 h-9 w-full rounded-lg border border-input bg-background px-2 text-sm text-foreground" /></label><label className="text-xs font-semibold text-muted-foreground">Descanso<input value={exercise.rest} onChange={(event) => updateExercise(key, exercise.exerciseId, "rest", event.target.value)} className="mt-1 h-9 w-full rounded-lg border border-input bg-background px-2 text-sm text-foreground" /></label></div></div>)}</div>}</section>
           ))}
         </div>
         <section className="rounded-2xl bg-card p-4 shadow-soft"><div className="flex items-center justify-between gap-3"><div><h2 className="font-bold text-foreground">Catálogo de exercícios</h2><p className="mt-1 text-xs text-muted-foreground">Carregando até 100 por página</p></div></div><div className="relative mt-4"><Search size={17} className="absolute left-3 top-3 text-muted-foreground" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar exercício" className="h-11 w-full rounded-xl border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" /></div><div className="mt-4 max-h-[620px] space-y-2 overflow-y-auto">{loadingCatalog ? <p className="text-sm text-muted-foreground">Carregando catálogo...</p> : catalog.map((exercise) => <div key={exercise.id} className="rounded-xl border border-border p-3"><p className="text-sm font-semibold text-foreground">{exercise.name}</p><p className="mt-1 text-xs text-muted-foreground">{exercise.muscle_group}</p><div className="mt-2 flex flex-wrap gap-2"><button type="button" onClick={() => addExercise(exercise, "forca")} className="rounded-lg bg-primary px-2.5 py-1.5 text-xs font-bold text-primary-foreground">+ Força</button><button type="button" onClick={() => addExercise(exercise, "mobilidade")} className="rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-bold text-secondary-foreground">+ Mobilidade</button><button type="button" onClick={() => addExercise(exercise, "metabolico")} className="rounded-lg bg-accent px-2.5 py-1.5 text-xs font-bold text-accent-foreground">+ Metabólico</button></div></div>)}</div><div className="mt-4 flex items-center justify-between text-xs text-muted-foreground"><button type="button" disabled={catalogPage === 0} onClick={() => setCatalogPage((page) => page - 1)} className="rounded-lg border border-input px-2 py-1.5 disabled:opacity-40">Anterior</button><span>{catalogPage + 1}/{catalogPages}</span><button type="button" disabled={catalogPage + 1 >= catalogPages} onClick={() => setCatalogPage((page) => page + 1)} className="rounded-lg border border-input px-2 py-1.5 disabled:opacity-40">Próxima</button></div></section>
       </div>
       {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
-      <button type="submit" disabled={saving} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground disabled:opacity-50"><Check size={18} />{saving ? "Salvando..." : "Salvar treino"}</button>
+      <button type="submit" disabled={saving || loadingWorkout} className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground disabled:opacity-50"><Check size={18} />{saving ? "Salvando..." : workoutId ? "Salvar alterações" : "Salvar treino"}</button>
     </form>
   );
 }
@@ -222,6 +309,7 @@ function WorkoutForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () 
 export function ProfessorPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [view, setView] = useState<"list" | "form">("list");
+  const [editingWorkoutId, setEditingWorkoutId] = useState<string | undefined>();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -233,7 +321,7 @@ export function ProfessorPage() {
 
   return (
     <main className="min-h-screen bg-background px-4 py-6 sm:px-6">
-      <div className="mx-auto max-w-6xl"><header className="mb-8 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><UserRound size={20} /></span><div><p className="text-sm font-bold text-foreground">Área do Professor</p><p className="text-xs text-muted-foreground">{session.user.email}</p></div></div><button type="button" onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm font-semibold"><LogOut size={16} /> Sair</button></header>{view === "list" ? <WorkoutList onCreate={() => setView("form")} /> : <WorkoutForm onCancel={() => setView("list")} onSaved={() => setView("list")} />}</div>
+      <div className="mx-auto max-w-6xl"><header className="mb-8 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><UserRound size={20} /></span><div><p className="text-sm font-bold text-foreground">Área do Professor</p><p className="text-xs text-muted-foreground">{session.user.email}</p></div></div><button type="button" onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm font-semibold"><LogOut size={16} /> Sair</button></header>{view === "list" ? <WorkoutList onCreate={() => { setEditingWorkoutId(undefined); setView("form"); }} onEdit={(id) => { setEditingWorkoutId(id); setView("form"); }} /> : <WorkoutForm key={editingWorkoutId ?? "new"} workoutId={editingWorkoutId} onCancel={() => setView("list")} onSaved={() => setView("list")} />}</div>
     </main>
   );
 }

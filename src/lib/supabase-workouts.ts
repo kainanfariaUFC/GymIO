@@ -79,6 +79,7 @@ export function mapPlanToWorkoutDays(data: StudentPlanRow): StudentPlan {
         // Exibe "3 × 8–12 (Descanso: 60s)"
         sets: item.rest ? `${item.sets} (Descanso: ${item.rest})` : item.sets,
         muscle: item.muscle || "Geral",
+        rest: item.rest,
         mediaUrl: item.mediaUrl,
       }));
     };

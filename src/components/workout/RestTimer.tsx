@@ -1,13 +1,26 @@
 import { Pause, Play, RotateCcw, Timer } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const OPTIONS = [60, 75, 90];
+const OPTIONS = [45, 60, 75, 90, 120];
 
-export function RestTimer() {
-  const [duration, setDuration] = useState(60);
-  const [left, setLeft] = useState(60);
+function parseRestSeconds(rest?: string): number {
+  const value = Number(rest?.match(/\d+/)?.[0]);
+  return Number.isFinite(value) && value > 0 ? value : 60;
+}
+
+export function RestTimer({ rest }: { rest?: string }) {
+  const defaultDuration = parseRestSeconds(rest);
+  const [duration, setDuration] = useState(defaultDuration);
+  const [left, setLeft] = useState(defaultDuration);
   const [running, setRunning] = useState(false);
   const ref = useRef<number | null>(null);
+
+  useEffect(() => {
+    const nextDuration = parseRestSeconds(rest);
+    setDuration(nextDuration);
+    setLeft(nextDuration);
+    setRunning(false);
+  }, [rest]);
 
   useEffect(() => {
     if (!running) return;

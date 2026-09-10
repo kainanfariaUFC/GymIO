@@ -3,6 +3,7 @@ export type Exercise = {
   name: string;
   sets: string;
   muscle: string;
+  rest?: string;
   mediaUrl?: string;
   media?: {
     video?: string;

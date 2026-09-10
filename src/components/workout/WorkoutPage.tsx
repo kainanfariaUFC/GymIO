@@ -97,7 +97,7 @@ function ExerciseRow({
       </button>
       <div className="pb-3 pl-13 pr-2">
         <ExerciseMedia exercise={exercise} />
-        <RestTimer />
+        <RestTimer rest={exercise.rest} />
       </div>
     </li>
   );

@@ -1,4 +1,4 @@
-import { ChevronDown, ExternalLink, Play } from "lucide-react";
+import { ChevronDown, ExternalLink, Image as ImageIcon, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import type { Exercise } from "@/lib/workouts";
@@ -24,7 +24,17 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Pausa o vídeo ao fechar o accordion removendo temporariamente o iframe
+  // Lê todas as fontes possíveis de mídia (dando prioridade ao novo mediaUrl do Supabase)
+  const mediaUrl = exercise.mediaUrl;
+  const rawVideoUrl = exercise.media?.video || (exercise as any).youtubeUrl;
+  const videoId = getYouTubeId(rawVideoUrl);
+
+  // Se houver vídeo do YouTube, a thumbnail é a do YouTube. Caso contrário, usa o mediaUrl / image
+  const thumbnailUrl = videoId
+    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+    : mediaUrl || exercise.media?.image;
+
+  // Pausa o vídeo ao fechar o accordion removendo temporariamente o conteúdo do container
   useEffect(() => {
     if (open) return;
     if (contentRef.current) {
@@ -32,12 +42,10 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
     }
   }, [open]);
 
-  const rawUrl = exercise.media?.video || (exercise as any).youtubeUrl;
-  const videoId = getYouTubeId(rawUrl);
-
-  const thumbnailUrl = videoId
-    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-    : exercise.media?.image;
+  // Se o exercício não tiver nenhuma mídia associada, não exibe o accordion
+  if (!thumbnailUrl && !videoId) {
+    return null;
+  }
 
   return (
     <div className="mt-2 overflow-hidden rounded-2xl bg-muted/60">
@@ -84,7 +92,7 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
           <div className="px-3 pb-3">
             <div
               ref={contentRef}
-              className="aspect-video w-full overflow-hidden rounded-xl bg-black"
+              className="aspect-video w-full overflow-hidden rounded-xl bg-black/5 dark:bg-black/40 grid place-items-center"
             >
               {open && videoId ? (
                 <iframe
@@ -98,12 +106,12 @@ export function ExerciseMedia({ exercise }: { exercise: Exercise }) {
               ) : open && thumbnailUrl ? (
                 <img
                   src={thumbnailUrl}
-                  alt={`Execução: ${exercise.name}`}
-                  className="h-full w-full object-cover"
+                  alt={`Demonstração: ${exercise.name}`}
+                  className="h-full w-full object-contain"
                 />
               ) : open ? (
                 <div className="grid h-full w-full place-items-center text-muted-foreground">
-                  <Play size={24} />
+                  <ImageIcon size={24} />
                 </div>
               ) : null}
             </div>

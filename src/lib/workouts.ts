@@ -1,8 +1,8 @@
-import { supabase } from "@/integrations/supabase/client";
+// Configuração do Supabase Storage
+const SUPABASE_PROJECT_URL = "https://upbkecazclnhtpncmbbr.supabase.co";
+const BUCKET_NAME = "gymio-core-exercises";
 
-// Recupera dinamicamente a URL base do projeto Supabase
-const SUPABASE_PROJECT_URL = (supabase as any).supabaseUrl || "";
-const SUPABASE_STORAGE_URL = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/exercises`;
+const SUPABASE_STORAGE_URL = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${BUCKET_NAME}`;
 
 export type Exercise = {
   id: string;

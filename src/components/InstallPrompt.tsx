@@ -17,6 +17,44 @@ export function InstallPrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const manifestLink = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+    const currentUrl = new URL(window.location.href);
+    let dynamicManifestUrl: string | null = null;
+
+    if (manifestLink && currentUrl.searchParams.has("id")) {
+      const dynamicManifest = {
+        name: "Minha Rotina de Treino com GymIO",
+        short_name: "GymIO",
+        description: "Acompanhe sua rotina semanal de treino.",
+        start_url: `${currentUrl.pathname}${currentUrl.search}`,
+        display: "standalone",
+        background_color: "#F2EDE4",
+        theme_color: "#A9C4D9",
+        orientation: "portrait",
+        scope: "/",
+        lang: "pt-BR",
+        icons: [
+          {
+            src: "/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+          {
+            src: "/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+        ],
+      };
+
+      dynamicManifestUrl = URL.createObjectURL(
+        new Blob([JSON.stringify(dynamicManifest)], { type: "application/manifest+json" }),
+      );
+      manifestLink.href = dynamicManifestUrl;
+    }
+
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true);
     setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
 
@@ -29,7 +67,12 @@ export function InstallPrompt() {
     };
 
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      if (dynamicManifestUrl) {
+        URL.revokeObjectURL(dynamicManifestUrl);
+      }
+    };
   }, []);
 
   if (isStandalone || dismissed || (!deferredPrompt && !isIOS)) {

@@ -107,7 +107,7 @@ function IndexPage() {
       />
 
       {/* Renderiza o conteúdo do dia selecionado */}
-      <WorkoutPage day={activeWorkout} />
+      <WorkoutPage day={activeWorkout} alunoNome={plan.alunoNome} />
     </main>
   );
 }

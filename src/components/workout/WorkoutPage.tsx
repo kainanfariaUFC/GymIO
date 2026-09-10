@@ -186,7 +186,7 @@ function BlockCard({
   );
 }
 
-export function WorkoutPage({ day }: { day: WorkoutDay }) {
+export function WorkoutPage({ day, alunoNome }: { day: WorkoutDay; alunoNome: string }) {
   const { checked, toggle, reset } = useSessionChecks(`treino:${day.slug}`);
 
   const allExercises = useMemo(() => day.blocks.flatMap((b) => b.exercises), [day]);
@@ -234,6 +234,7 @@ export function WorkoutPage({ day }: { day: WorkoutDay }) {
     <div className="mx-auto w-full max-w-xl px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-8 sm:px-6">
       {/* Topo: título + progresso */}
       <header className="mb-7">
+        <p className="text-lg font-bold text-foreground">Olá, {alunoNome}</p>
         <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           {day.label}
         </p>

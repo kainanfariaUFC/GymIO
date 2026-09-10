@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      exercises: {
+        Row: {
+          created_at: string
+          id: string
+          media_url: string | null
+          muscle_group: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          muscle_group?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          muscle_group?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      treinos: {
+        Row: {
+          aluno_nome: string
+          created_at: string
+          dias: Json
+          id: string
+          professor_id: string
+          updated_at: string
+        }
+        Insert: {
+          aluno_nome: string
+          created_at?: string
+          dias?: Json
+          id?: string
+          professor_id: string
+          updated_at?: string
+        }
+        Update: {
+          aluno_nome?: string
+          created_at?: string
+          dias?: Json
+          id?: string
+          professor_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       workout_completions: {
         Row: {
           completed_on: string
@@ -21,6 +72,7 @@ export type Database = {
           day_slug: string
           device_id: string
           id: string
+          workout_id: string | null
         }
         Insert: {
           completed_on?: string
@@ -28,6 +80,7 @@ export type Database = {
           day_slug: string
           device_id: string
           id?: string
+          workout_id?: string | null
         }
         Update: {
           completed_on?: string
@@ -35,15 +88,31 @@ export type Database = {
           day_slug?: string
           device_id?: string
           id?: string
+          workout_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workout_completions_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "treinos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shared_workout: {
+        Args: { _workout_id: string }
+        Returns: {
+          aluno_nome: string
+          dias: Json
+          id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

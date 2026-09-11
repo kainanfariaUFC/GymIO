@@ -35,7 +35,10 @@ export async function fetchCompletions(workoutId?: string): Promise<Completion[]
   if (workoutId) query = query.eq("workout_id", workoutId);
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map((row) => ({
+    ...row,
+    status: row.status === "incomplete" ? "incomplete" : "complete",
+  }));
 }
 
 export async function finishWorkout(

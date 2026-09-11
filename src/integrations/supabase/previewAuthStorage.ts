@@ -62,6 +62,17 @@ export function brokeredPreviewStorage() {
 
   return {
     getItem: async (key: string) => {
+      const localValue = localStorage.getItem(key);
+      if (localValue) {
+        // A sessão local evita bloquear o primeiro carregamento pelo broker do preview.
+        void request('lovable-preview-auth:get', key).then((res) => {
+          if (!res || !res.ok || typeof res.value !== 'string') return;
+          if (res.value === '') localStorage.removeItem(key);
+          else localStorage.setItem(key, res.value);
+        });
+        return localValue;
+      }
+
       let res = await request('lovable-preview-auth:get', key);
       if (!res && firstGet) {
         await new Promise((r) => setTimeout(r, RETRY_DELAY));

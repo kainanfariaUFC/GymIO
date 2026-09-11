@@ -14,6 +14,18 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: { user_id: string; created_at: string }
+        Insert: { user_id: string; created_at?: string }
+        Update: { user_id?: string; created_at?: string }
+        Relationships: []
+      }
+      professor_profiles: {
+        Row: { user_id: string; name: string; email: string; active: boolean; created_at: string; updated_at: string }
+        Insert: { user_id: string; name: string; email: string; active?: boolean; created_at?: string; updated_at?: string }
+        Update: { user_id?: string; name?: string; email?: string; active?: boolean; created_at?: string; updated_at?: string }
+        Relationships: []
+      }
       exercicios: {
         Row: {
           created_at: string

@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getCookie } from "@tanstack/react-start/server";
 
 export const Route = createFileRoute("/pwa")({
   server: {
     handlers: {
-      GET: async () => {
-        const savedPlanId = getCookie("gymio_plan_id");
-        const destination = savedPlanId ? `/?id=${encodeURIComponent(savedPlanId)}` : "/";
-        return Response.redirect(destination, 302);
+      GET: async ({ request }) => {
+        const savedPlanId = request.headers
+          .get("cookie")
+          ?.match(/(?:^|;\s*)gymio_plan_id=([^;]+)/)?.[1];
+        const planId = savedPlanId ? decodeURIComponent(savedPlanId) : null;
+        const destination = planId ? `/?id=${encodeURIComponent(planId)}` : "/";
+        return Response.redirect(new URL(destination, request.url), 302);
       },
     },
   },

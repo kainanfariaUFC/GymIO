@@ -326,14 +326,26 @@ function WorkoutForm({ workoutId, onSaved, onCancel }: { workoutId?: string; onS
 
 export function ProfessorPage() {
   const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [professorName, setProfessorName] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "form">("list");
   const [editingWorkoutId, setEditingWorkoutId] = useState<string | undefined>();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
-    return () => listener.subscription.unsubscribe();
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      setSession(data.session);
+      setAuthLoading(false);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      setAuthLoading(false);
+    });
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -346,11 +358,11 @@ export function ProfessorPage() {
       .then(({ data }) => setProfessorName(data?.name ?? null));
   }, [session]);
 
-  if (!session) return <AuthPanel onAuthenticated={setSession} />;
+  if (authLoading) return <main className="flex min-h-screen items-center justify-center bg-background"><p className="text-sm text-muted-foreground">Verificando acesso do professor...</p></main>;
+  if (!session) return <AuthPanel onAuthenticated={(nextSession) => { setSession(nextSession); setAuthLoading(false); }} />;
 
   return (
     <main className="min-h-screen bg-background px-4 py-6 sm:px-6">
-      <div className="mx-auto max-w-6xl"><header className="mb-8 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><UserRound size={20} /></span><div><p className="text-sm font-bold text-foreground">Área do Professor</p><p className="text-xs text-muted-foreground">{session.user.email}</p></div></div><button type="button" onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm font-semibold"><LogOut size={16} /> Sair</button></header>{view === "list" ? <WorkoutList onCreate={() => { setEditingWorkoutId(undefined); setView("form"); }} onEdit={(id) => { setEditingWorkoutId(id); setView("form"); }} /> : <WorkoutForm key={editingWorkoutId ?? "new"} workoutId={editingWorkoutId} onCancel={() => setView("list")} onSaved={() => setView("list")} />}</div>
       <div className="mx-auto max-w-6xl"><header className="mb-8 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"><UserRound size={20} /></span><div><p className="text-sm font-bold text-foreground">Olá, {professorName ?? "Professor"}</p><p className="text-xs text-muted-foreground">{session.user.email}</p></div></div><button type="button" onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm font-semibold"><LogOut size={16} /> Sair</button></header>{view === "list" ? <WorkoutList onCreate={() => { setEditingWorkoutId(undefined); setView("form"); }} onEdit={(id) => { setEditingWorkoutId(id); setView("form"); }} /> : <WorkoutForm key={editingWorkoutId ?? "new"} workoutId={editingWorkoutId} onCancel={() => setView("list")} onSaved={() => setView("list")} />}</div>
     </main>
   );

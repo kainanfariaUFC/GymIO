@@ -10,9 +10,10 @@ type SearchParams = {
 };
 
 export const Route = createFileRoute("/")({
-  validateSearch: (search: Record<string, unknown>): SearchParams => ({
-    id: typeof search.id === "string" ? search.id : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): SearchParams => {
+    const id = search["id"];
+    return typeof id === "string" ? { id } : {};
+  },
   component: IndexPage,
 });
 
@@ -21,14 +22,20 @@ function IndexPage() {
   const [planId, setPlanId] = useState(search.id);
   const [plan, setPlan] = useState<StudentPlan | null>(null);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(search.id));
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     if (search.id) {
       setPlanId(search.id);
+      return;
     }
+
+    setPlanId(undefined);
+    setPlan(null);
+    setActiveSlug(null);
+    setLoading(false);
   }, [search.id]);
 
   useEffect(() => {
@@ -43,7 +50,7 @@ function IndexPage() {
 
       if (fetchedPlan && fetchedPlan.workouts.length > 0) {
         setPlan(fetchedPlan);
-        setActiveSlug(fetchedPlan.workouts[0].slug);
+        setActiveSlug(fetchedPlan.workouts[0]?.slug ?? null);
       }
       setLoading(false);
     }
@@ -93,6 +100,8 @@ function IndexPage() {
 
   const activeWorkout =
     plan.workouts.find((w) => w.slug === activeSlug) || plan.workouts[0];
+
+  if (!activeWorkout) return null;
 
   return (
     <main className="min-h-screen bg-background">

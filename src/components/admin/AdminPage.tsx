@@ -1,18 +1,20 @@
 import { BarChart3, Edit3, LayoutDashboard, LogIn, LogOut, Plus, ShieldCheck, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
 
-import { supabase } from "@/integrations/supabase/client";
 import {
+  adminLogin,
+  adminLogout,
+  adminRestore,
   fetchAdminAnalytics,
   fetchAdminProfessors,
-  isAdmin,
   removeAdminProfessor,
   saveAdminProfessor,
   type AdminProfessor,
 } from "@/lib/admin";
 
-function AdminLogin({ onLogin }: { onLogin: (session: Session) => void }) {
+type AdminSession = { userId: string; email: string };
+
+function AdminLogin({ onLogin }: { onLogin: (session: AdminSession) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,14 +24,10 @@ function AdminLogin({ onLogin }: { onLogin: (session: Session) => void }) {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (signInError || !data.session) {
-      setError("E-mail ou senha inválidos.");
-    } else if (!(await isAdmin(data.session.user.id))) {
-      await supabase.auth.signOut();
-      setError("Este usuário não tem acesso administrativo.");
-    } else {
-      onLogin(data.session);
+    try {
+      onLogin(await adminLogin({ data: { email, password } }));
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : "E-mail ou senha inválidos.");
     }
     setLoading(false);
   }
@@ -51,7 +49,6 @@ function AdminLogin({ onLogin }: { onLogin: (session: Session) => void }) {
 }
 
 type Analytics = Awaited<ReturnType<typeof fetchAdminAnalytics>>;
-const ADMIN_HINT_KEY = "gymio:admin-user-hint";
 
 function DashboardSkeleton() {
   return (
@@ -125,70 +122,47 @@ function Professors() {
 }
 
 export function AdminPage() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [session, setSession] = useState<AdminSession | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [view, setView] = useState<"dashboard" | "professors">("dashboard");
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
 
+    for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+      const key = window.localStorage.key(index);
+      if (key?.startsWith("sb-") && key.endsWith("-auth-token")) {
+        window.localStorage.removeItem(key);
+      }
+    }
+
     async function restoreSession() {
-      const { data } = await supabase.auth.getSession();
+      const restored = await adminRestore();
       if (!active) return;
-      if (!data.session) {
-        setAuthLoading(false);
-        return;
-      }
-
-      const cachedAdminId = window.localStorage.getItem(ADMIN_HINT_KEY);
-      if (cachedAdminId === data.session.user.id) {
-        setAllowed(true);
-        setSession(data.session);
-        setAuthLoading(false);
-
-        const stillAdmin = await isAdmin(data.session.user.id);
-        if (!active) return;
-        if (!stillAdmin) {
-          window.localStorage.removeItem(ADMIN_HINT_KEY);
-          await supabase.auth.signOut();
-          return;
-        }
-        return;
-      }
-
-      const userIsAdmin = await isAdmin(data.session.user.id);
-      if (!active) return;
-      setAllowed(userIsAdmin);
-      setSession(userIsAdmin ? data.session : null);
-      if (userIsAdmin) window.localStorage.setItem(ADMIN_HINT_KEY, data.session.user.id);
+      setSession(restored && restored.userId && restored.email ? restored : null);
       setAuthLoading(false);
     }
 
     restoreSession().catch(() => {
       if (active) {
-        setAllowed(false);
-        setAuthLoading(false);
-      }
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (!nextSession) {
-        window.localStorage.removeItem(ADMIN_HINT_KEY);
         setSession(null);
-        setAllowed(false);
         setAuthLoading(false);
       }
     });
 
     return () => {
       active = false;
-      listener.subscription.unsubscribe();
     };
   }, []);
-  useEffect(() => { if (session) fetchAdminAnalytics().then(setAnalytics).catch(() => setAnalytics({ workouts: [], completions: [], professors: [] })); }, [session]);
-  if (authLoading) return <main className="flex min-h-screen items-center justify-center bg-background"><p className="text-sm text-muted-foreground">Restaurando sessão...</p></main>;
-  if (allowed === false) return <AdminLogin onLogin={(nextSession) => { window.localStorage.setItem(ADMIN_HINT_KEY, nextSession.user.id); setAllowed(true); setSession(nextSession); }} />;
-  if (!session) return <AdminLogin onLogin={(nextSession) => { window.localStorage.setItem(ADMIN_HINT_KEY, nextSession.user.id); setAllowed(true); setSession(nextSession); }} />;
-  return <main className="min-h-screen bg-background px-4 py-6 sm:px-6"><div className="mx-auto max-w-7xl"><header className="mb-8 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-primary-foreground"><BarChart3 size={21} /></span><div><p className="font-extrabold">GymIO Admin</p><p className="text-xs text-muted-foreground">{session.user.email}</p></div></div><button onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm font-semibold"><LogOut size={16} /> Sair</button></header><nav className="mb-6 flex gap-2 rounded-2xl bg-muted p-1.5"><button onClick={() => setView("dashboard")} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold ${view === 'dashboard' ? 'bg-card shadow-sm' : 'text-muted-foreground'}`}><LayoutDashboard size={17} /> Dashboard</button><button onClick={() => setView("professors")} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold ${view === 'professors' ? 'bg-card shadow-sm' : 'text-muted-foreground'}`}><Users size={17} /> Professores</button></nav>{view === "dashboard" ? analytics ? <Dashboard data={analytics} /> : <DashboardSkeleton /> : <Professors />}</div></main>;
+  useEffect(() => {
+    if (!session) return;
+    setAnalyticsError(null);
+    fetchAdminAnalytics()
+      .then(setAnalytics)
+      .catch((loadError) => setAnalyticsError(loadError instanceof Error ? loadError.message : "Não foi possível carregar o dashboard."));
+  }, [session]);
+  if (authLoading) return <main className="flex min-h-screen items-center justify-center bg-background"><p className="text-sm text-muted-foreground">Verificando acesso administrativo...</p></main>;
+  if (!session) return <AdminLogin onLogin={setSession} />;
+  return <main className="min-h-screen bg-background px-4 py-6 sm:px-6"><div className="mx-auto max-w-7xl"><header className="mb-8 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-primary-foreground"><BarChart3 size={21} /></span><div><p className="font-extrabold">GymIO Admin</p><p className="text-xs text-muted-foreground">{session.email}</p></div></div><button onClick={() => adminLogout().then(() => setSession(null))} className="inline-flex items-center gap-2 rounded-lg border border-input px-3 py-2 text-sm font-semibold"><LogOut size={16} /> Sair</button></header><nav className="mb-6 flex gap-2 rounded-2xl bg-muted p-1.5"><button onClick={() => setView("dashboard")} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold ${view === 'dashboard' ? 'bg-card shadow-sm' : 'text-muted-foreground'}`}><LayoutDashboard size={17} /> Dashboard</button><button onClick={() => setView("professors")} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold ${view === 'professors' ? 'bg-card shadow-sm' : 'text-muted-foreground'}`}><Users size={17} /> Professores</button></nav>{view === "dashboard" ? analyticsError ? <p className="rounded-2xl border border-destructive/30 bg-destructive/10 p-5 text-sm text-destructive">{analyticsError}</p> : analytics ? <Dashboard data={analytics} /> : <DashboardSkeleton /> : <Professors />}</div></main>;
 }

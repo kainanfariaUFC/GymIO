@@ -37,7 +37,8 @@ function IndexPage() {
 
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    const savedPlanId = isStandalone ? window.localStorage.getItem(LAST_PLAN_ID_KEY) : null;
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(window.navigator.userAgent);
+    const savedPlanId = isStandalone || isMobile ? window.localStorage.getItem(LAST_PLAN_ID_KEY) : null;
     setPlanId(savedPlanId ?? undefined);
     setPlan(null);
     setActiveSlug(null);

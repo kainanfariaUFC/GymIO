@@ -14,36 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_users: {
-        Row: { user_id: string; created_at: string }
-        Insert: { user_id: string; created_at?: string }
-        Update: { user_id?: string; created_at?: string }
-        Relationships: []
-      }
-      professor_profiles: {
-        Row: { user_id: string; name: string; email: string; active: boolean; created_at: string; updated_at: string }
-        Insert: { user_id: string; name: string; email: string; active?: boolean; created_at?: string; updated_at?: string }
-        Update: { user_id?: string; name?: string; email?: string; active?: boolean; created_at?: string; updated_at?: string }
-        Relationships: []
-      }
-      exercicios: {
+      exercises: {
         Row: {
           created_at: string
           id: string
-          media_url: string
-          nome: string
+          media_url: string | null
+          muscle_group: string
+          name: string
         }
         Insert: {
           created_at?: string
           id?: string
-          media_url: string
-          nome: string
+          media_url?: string | null
+          muscle_group?: string
+          name: string
         }
         Update: {
           created_at?: string
           id?: string
-          media_url?: string
-          nome?: string
+          media_url?: string | null
+          muscle_group?: string
+          name?: string
         }
         Relationships: []
       }
@@ -81,7 +72,6 @@ export type Database = {
           day_slug: string
           device_id: string
           id: string
-          status: string
           workout_id: string | null
         }
         Insert: {
@@ -90,7 +80,6 @@ export type Database = {
           day_slug: string
           device_id: string
           id?: string
-          status?: string
           workout_id?: string | null
         }
         Update: {
@@ -99,7 +88,6 @@ export type Database = {
           day_slug?: string
           device_id?: string
           id?: string
-          status?: string
           workout_id?: string | null
         }
         Relationships: [

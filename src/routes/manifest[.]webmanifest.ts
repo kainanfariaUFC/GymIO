@@ -22,7 +22,7 @@ export const Route = createFileRoute("/manifest.webmanifest")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const id = url.searchParams.get("id");
-        const startUrl = id ? "/?pwa=1" : "/";
+        const startUrl = "/pwa";
         const headers = new Headers({ "cache-control": "no-store" });
         if (id) {
           headers.set("set-cookie", `gymio_plan_id=${encodeURIComponent(id)}; Path=/; Max-Age=31536000; SameSite=Lax`);

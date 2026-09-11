@@ -50,7 +50,7 @@ function createPlanManifest(request: Request): Response | null {
 
 function redirectToSavedPlan(request: Request): Response | null {
   const url = new URL(request.url);
-  if (url.pathname !== "/" || url.searchParams.get("pwa") !== "1" || url.searchParams.has("id")) return null;
+  if (url.pathname !== "/pwa" || url.searchParams.has("id")) return null;
 
   const savedPlanId = request.headers
     .get("cookie")
@@ -59,6 +59,19 @@ function redirectToSavedPlan(request: Request): Response | null {
 
   url.searchParams.set("id", decodeURIComponent(savedPlanId));
   return Response.redirect(url.toString(), 302);
+}
+
+function rememberPlanFromLink(request: Request, response: Response): Response {
+  const url = new URL(request.url);
+  const planId = url.pathname === "/" ? url.searchParams.get("id") : null;
+  if (!planId) return response;
+
+  const headers = new Headers(response.headers);
+  headers.append(
+    "set-cookie",
+    `gymio_plan_id=${encodeURIComponent(planId)}; Path=/; Max-Age=31536000; SameSite=Lax`,
+  );
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
@@ -108,7 +121,7 @@ export default {
       if (savedPlanRedirect) return savedPlanRedirect;
 
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const response = rememberPlanFromLink(request, await handler.fetch(request, env, ctx));
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);

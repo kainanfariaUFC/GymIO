@@ -16,7 +16,7 @@ function createPlanManifest(request: Request): Response | null {
     name: "Minha Rotina de Treino com GymIO",
     short_name: "GymIO",
     description: "Acompanhe sua rotina semanal de treino.",
-    start_url: `/?id=${encodeURIComponent(planId)}`,
+    start_url: "/?pwa=1",
     display: "standalone",
     background_color: "#F2EDE4",
     theme_color: "#A9C4D9",
@@ -43,13 +43,14 @@ function createPlanManifest(request: Request): Response | null {
     headers: {
       "cache-control": "no-store",
       "content-type": "application/manifest+json; charset=utf-8",
+      "set-cookie": `gymio_plan_id=${encodeURIComponent(planId)}; Path=/; Max-Age=31536000; SameSite=Lax`,
     },
   });
 }
 
 function redirectToSavedPlan(request: Request): Response | null {
   const url = new URL(request.url);
-  if (url.pathname !== "/" || url.searchParams.has("id")) return null;
+  if (url.pathname !== "/" || url.searchParams.get("pwa") !== "1" || url.searchParams.has("id")) return null;
 
   const savedPlanId = request.headers
     .get("cookie")

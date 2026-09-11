@@ -9,8 +9,6 @@ type SearchParams = {
   id?: string;
 };
 
-const LAST_PLAN_ID_KEY = "gymio:last-plan-id";
-
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): SearchParams => {
     const id = search["id"];
@@ -31,16 +29,6 @@ function IndexPage() {
 
     if (search.id) {
       setPlanId(search.id);
-      window.localStorage.setItem(LAST_PLAN_ID_KEY, search.id);
-      return;
-    }
-
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    const savedPlanId = isStandalone ? window.localStorage.getItem(LAST_PLAN_ID_KEY) : null;
-
-    if (isStandalone && savedPlanId) {
-      window.location.replace(`/?id=${encodeURIComponent(savedPlanId)}`);
       return;
     }
 

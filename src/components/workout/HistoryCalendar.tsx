@@ -29,8 +29,8 @@ export function HistoryCalendar({
   });
 
   const map = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const c of completions) m.set(c.completed_on, c.day_slug);
+    const m = new Map<string, Completion>();
+    for (const c of completions) m.set(c.completed_on, c);
     return m;
   }, [completions]);
 
@@ -104,15 +104,22 @@ export function HistoryCalendar({
               ))}
               {Array.from({ length: days }).map((_, i) => {
                 const k = key(cursor.y, cursor.m, i + 1);
-                const slug = map.get(k);
+                const completion = map.get(k);
                 const isToday = k === today;
+                const isComplete = completion?.status === "complete";
                 return (
                   <span
                     key={k}
-                    title={slug ? `Treino ${slug === "dia-a" ? "A" : "B"} finalizado` : undefined}
+                    title={
+                      completion
+                        ? `Treino ${completion.day_slug === "dia-a" ? "A" : "B"} ${isComplete ? "completo" : "incompleto"}`
+                        : undefined
+                    }
                     className={`grid aspect-square place-items-center rounded-xl text-sm font-semibold ${
-                      slug
-                        ? "bg-accent text-accent-foreground"
+                      completion
+                        ? isComplete
+                          ? "bg-green-500 text-white"
+                          : "bg-yellow-400 text-yellow-950"
                         : isToday
                           ? "border border-border text-foreground"
                           : "text-muted-foreground"
@@ -124,10 +131,16 @@ export function HistoryCalendar({
               })}
             </div>
 
-            <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="h-3 w-3 rounded-md bg-accent" aria-hidden />
-              Dia com treino finalizado
-            </p>
+            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              <p className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-md bg-green-500" aria-hidden />
+                Completo
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-md bg-yellow-400" aria-hidden />
+                Incompleto
+              </p>
+            </div>
           </div>
         </div>
       </div>

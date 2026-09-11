@@ -212,13 +212,14 @@ export function WorkoutPage({ day, alunoNome, workoutId }: { day: WorkoutDay; al
   }, [workoutId]);
 
   const today = todayKey();
-  const todayDone = completions.find((c) => c.completed_on === today);
+  const todayCompletion = completions.find((c) => c.completed_on === today);
 
   const handleFinish = async () => {
     setSaving(true);
     setError(null);
     try {
-      const row = await finishWorkout(day.slug, workoutId);
+      const status = doneTotal === allExercises.length ? "complete" : "incomplete";
+      const row = await finishWorkout(day.slug, workoutId, status);
       setCompletions((prev) =>
         prev.some((c) => c.completed_on === row.completed_on) ? prev : [row, ...prev],
       );
@@ -283,16 +284,21 @@ export function WorkoutPage({ day, alunoNome, workoutId }: { day: WorkoutDay; al
 
       {/* Finalizar treino */}
       <div className="mt-8">
-        {todayDone ? (
+        {todayCompletion ? (
           <div className="flex items-start gap-3 rounded-2xl bg-accent/25 px-5 py-5 text-left shadow-soft">
             <Check size={22} className="mt-0.5 shrink-0 text-accent-foreground" aria-hidden />
             <div>
               <p className="text-base font-bold text-foreground">
-                {justFinished ? "Treino concluído com sucesso!" : "Treino de hoje já finalizado"}
+                {justFinished
+                  ? "Treino concluído com sucesso!"
+                  : todayCompletion.day_slug === day.slug
+                    ? "Treino de hoje já realizado"
+                    : "Treino do dia já realizado"}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Você finalizou o <span className="font-semibold text-foreground">{day.label}</span> hoje. Um novo
-                treino é liberado amanhã.
+                {todayCompletion.day_slug === day.slug
+                  ? `Você registrou o ${day.label} como ${todayCompletion.status === "complete" ? "completo" : "incompleto"}.`
+                  : `Você já realizou o ${todayCompletion.day_slug === "dia-a" ? "Treino A" : "Treino B"} hoje. O outro treino será liberado amanhã.`}
               </p>
             </div>
           </div>
@@ -307,7 +313,7 @@ export function WorkoutPage({ day, alunoNome, workoutId }: { day: WorkoutDay; al
             {saving ? "Salvando…" : "Finalizar treino"}
           </button>
         )}
-        {!todayDone && doneTotal === 0 && !loadingHistory && (
+        {!todayCompletion && doneTotal === 0 && !loadingHistory && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             Marque ao menos um exercício para finalizar.
           </p>

@@ -141,6 +141,9 @@ function RootComponent() {
       <ThemeToggle />
       <InstallPrompt />
       <Outlet />
+      <p className="pointer-events-none fixed bottom-2 right-3 z-10 text-[10px] font-medium tracking-wide text-muted-foreground/60 sm:right-5">
+        Desenvolvido por BT | Barfat Tech
+      </p>
     </QueryClientProvider>
   );
 }

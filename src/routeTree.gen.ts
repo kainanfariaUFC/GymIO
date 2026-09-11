@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AlunoRouteImport } from './routes/aluno'
+import { Route as ManifestDotwebmanifestRouteImport } from './routes/manifest[.]webmanifest'
 import { Route as ProfessorRouteImport } from './routes/professor'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const AlunoRoute = AlunoRouteImport.update({
   path: '/aluno',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManifestDotwebmanifestRoute = ManifestDotwebmanifestRouteImport.update({
+  id: '/manifest.webmanifest',
+  path: '/manifest.webmanifest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfessorRoute = ProfessorRouteImport.update({
   id: '/professor',
   path: '/professor',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/aluno': typeof AlunoRoute
+  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/professor': typeof ProfessorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/aluno': typeof AlunoRoute
+  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/professor': typeof ProfessorRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,28 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/aluno': typeof AlunoRoute
+  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/professor': typeof ProfessorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/aluno' | '/professor'
+  fullPaths: '/' | '/admin' | '/aluno' | '/manifest.webmanifest' | '/professor'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/aluno' | '/professor'
-  id: '__root__' | '/' | '/admin' | '/aluno' | '/professor'
+  to: '/' | '/admin' | '/aluno' | '/manifest.webmanifest' | '/professor'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/aluno'
+    | '/manifest.webmanifest'
+    | '/professor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AlunoRoute: typeof AlunoRoute
+  ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute
   ProfessorRoute: typeof ProfessorRoute
 }
 
@@ -92,6 +108,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlunoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/manifest.webmanifest': {
+      id: '/manifest.webmanifest'
+      path: '/manifest.webmanifest'
+      fullPath: '/manifest.webmanifest'
+      preLoaderRoute: typeof ManifestDotwebmanifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/professor': {
       id: '/professor'
       path: '/professor'
@@ -106,6 +129,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AlunoRoute: AlunoRoute,
+  ManifestDotwebmanifestRoute: ManifestDotwebmanifestRoute,
   ProfessorRoute: ProfessorRoute,
 }
 export const routeTree = rootRouteImport

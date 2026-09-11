@@ -22,9 +22,7 @@ export function InstallPrompt() {
     const currentUrl = new URL(window.location.href);
 
     if (manifestLink && currentUrl.searchParams.has("id")) {
-      manifestLink.href = `/manifest.webmanifest?id=${encodeURIComponent(
-        currentUrl.searchParams.get("id") ?? "",
-      )}`;
+      manifestLink.href = `/manifest.webmanifest?id=${encodeURIComponent(currentUrl.searchParams.get("id") ?? "")}`;
     }
 
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true);

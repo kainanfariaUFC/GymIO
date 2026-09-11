@@ -9,17 +9,6 @@ type SearchParams = {
   id?: string;
 };
 
-const LAST_PLAN_ID_KEY = "gymio:last-plan-id";
-
-function getSavedPlanId(): string | null {
-  const localPlanId = localStorage.getItem(LAST_PLAN_ID_KEY);
-  if (localPlanId) return localPlanId;
-
-  const cookiePlanId = document.cookie
-    .match(/(?:^|;\s*)gymio_plan_id=([^;]+)/)?.[1];
-  return cookiePlanId ? decodeURIComponent(cookiePlanId) : null;
-}
-
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
     id: typeof search.id === "string" ? search.id : undefined,
@@ -38,19 +27,7 @@ function IndexPage() {
     if (typeof window === "undefined") return;
 
     if (search.id) {
-      localStorage.setItem(LAST_PLAN_ID_KEY, search.id);
-      document.cookie = `gymio_plan_id=${encodeURIComponent(search.id)}; Path=/; Max-Age=31536000; SameSite=Lax`;
       setPlanId(search.id);
-      return;
-    }
-
-    const savedPlanId = getSavedPlanId();
-    if (savedPlanId) {
-      setPlanId(savedPlanId);
-      const nextUrl = `/?id=${encodeURIComponent(savedPlanId)}`;
-      if (window.location.search !== `?id=${encodeURIComponent(savedPlanId)}`) {
-        window.location.replace(nextUrl);
-      }
     }
   }, [search.id]);
 
@@ -86,11 +63,31 @@ function IndexPage() {
 
   if (!plan || plan.workouts.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4 text-center">
-        <p className="text-muted-foreground">
-          Nenhum treino encontrado. Acesse o link enviado pelo seu personal.
-        </p>
-      </div>
+      <main className="min-h-screen bg-background px-5 py-8 sm:px-8">
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl flex-col justify-between gap-12">
+          <header className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-primary-foreground font-extrabold">G</span>
+              <span className="text-lg font-extrabold tracking-tight text-foreground">GymIO</span>
+            </div>
+            <span className="rounded-full bg-sage px-3 py-1 text-xs font-bold text-sage-foreground">Treino inteligente</span>
+          </header>
+          <section className="max-w-3xl">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground">Sua rotina, em movimento</p>
+            <h1 className="mt-4 text-5xl font-extrabold tracking-tight text-foreground sm:text-7xl">Bem-vindo à GymIO.</h1>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">Uma plataforma simples para academias, professores e alunos organizarem treinos personalizados, acompanharem a evolução e manterem a constância.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a href="/admin" className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground shadow-soft">Empresas</a>
+              <a href="/professor" className="inline-flex h-12 items-center justify-center rounded-xl border border-input bg-card px-5 font-bold text-foreground shadow-soft">Professores</a>
+            </div>
+          </section>
+          <footer className="grid gap-3 border-t border-border pt-5 text-sm text-muted-foreground sm:grid-cols-3">
+            <span>Planos personalizados</span>
+            <span>Acompanhamento claro</span>
+            <span>Mais consistência no treino</span>
+          </footer>
+        </div>
+      </main>
     );
   }
 

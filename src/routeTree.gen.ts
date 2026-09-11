@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AlunoRouteImport } from './routes/aluno'
 import { Route as ManifestDotwebmanifestRouteImport } from './routes/manifest[.]webmanifest'
 import { Route as ProfessorRouteImport } from './routes/professor'
+import { Route as PwaRouteImport } from './routes/pwa'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const ProfessorRoute = ProfessorRouteImport.update({
   path: '/professor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PwaRoute = PwaRouteImport.update({
+  id: '/pwa',
+  path: '/pwa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/aluno': typeof AlunoRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/professor': typeof ProfessorRoute
+  '/pwa': typeof PwaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/aluno': typeof AlunoRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/professor': typeof ProfessorRoute
+  '/pwa': typeof PwaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,12 +70,15 @@ export interface FileRoutesById {
   '/aluno': typeof AlunoRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/professor': typeof ProfessorRoute
+  '/pwa': typeof PwaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/aluno' | '/manifest.webmanifest' | '/professor'
+  fullPaths:
+    '/' | '/admin' | '/aluno' | '/manifest.webmanifest' | '/professor' | '/pwa'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/aluno' | '/manifest.webmanifest' | '/professor'
+  to:
+    '/' | '/admin' | '/aluno' | '/manifest.webmanifest' | '/professor' | '/pwa'
   id:
     | '__root__'
     | '/'
@@ -75,6 +86,7 @@ export interface FileRouteTypes {
     | '/aluno'
     | '/manifest.webmanifest'
     | '/professor'
+    | '/pwa'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -83,6 +95,7 @@ export interface RootRouteChildren {
   AlunoRoute: typeof AlunoRoute
   ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute
   ProfessorRoute: typeof ProfessorRoute
+  PwaRoute: typeof PwaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfessorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pwa': {
+      id: '/pwa'
+      path: '/pwa'
+      fullPath: '/pwa'
+      preLoaderRoute: typeof PwaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -131,6 +151,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlunoRoute: AlunoRoute,
   ManifestDotwebmanifestRoute: ManifestDotwebmanifestRoute,
   ProfessorRoute: ProfessorRoute,
+  PwaRoute: PwaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -14,7 +14,7 @@ function getSessionConfig() {
   const secure = protocol.startsWith("https");
 
   return {
-    password: process.env["SESSION_SECRET"] ?? "",
+    password: process.env["GYMIO_SESSION_SECRET"] || process.env["SESSION_SECRET"] || "",
     name: "gymio-admin-session",
     maxAge: 60 * 60 * 8,
     cookie: { httpOnly: true, secure, sameSite: secure ? ("none" as const) : ("lax" as const), path: "/" },
@@ -44,9 +44,9 @@ export async function createProfessor(data: { name: string; email: string; passw
 export async function login(data: { email: string; password: string }) {
   const sessionConfig = getSessionConfig();
   if (!sessionConfig.password) throw new Error("SESSION_SECRET não configurada no servidor.");
-  const url = process.env["SUPABASE_URL"];
-  const publishableKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
-  if (!url || !publishableKey) throw new Error("Configuração do Supabase ausente no servidor.");
+  const url = process.env["GYMIO_SUPABASE_URL"] || process.env["SUPABASE_URL"];
+  const publishableKey = process.env["GYMIO_SUPABASE_PUBLISHABLE_KEY"] || process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !publishableKey) throw new Error("Configuração do Supabase ausente no servidor. Configure GYMIO_SUPABASE_URL e GYMIO_SUPABASE_PUBLISHABLE_KEY.");
   const authClient = createClient<Database>(url, publishableKey, { auth: { persistSession: false, autoRefreshToken: false, storage: undefined } });
   const { data: authData, error } = await authClient.auth.signInWithPassword(data);
   if (error || !authData.user) throw new Error("E-mail ou senha inválidos.");

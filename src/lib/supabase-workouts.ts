@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getSharedPlan } from "@/lib/student-plan.functions";
 import type { WorkoutBlock, WorkoutDay, Exercise } from "@/lib/workout-types";
 
 // Estrutura de cada exercício preenchido pelo professor
@@ -137,16 +137,12 @@ export function mapPlanToWorkoutDays(data: StudentPlanRow): StudentPlan {
 }
 
 export async function fetchStudentPlanById(id: string): Promise<StudentPlan | null> {
-  const { data, error } = await supabase
-    .from("treinos")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error || !data) {
-    console.error("Erro ao buscar plano no Supabase:", error);
+  try {
+    const data = await getSharedPlan({ data: { id } });
+    if (!data) return null;
+    return mapPlanToWorkoutDays(data as unknown as StudentPlanRow);
+  } catch (error) {
+    console.error("Erro ao buscar plano:", error);
     return null;
   }
-
-  return mapPlanToWorkoutDays(data as unknown as StudentPlanRow);
 }

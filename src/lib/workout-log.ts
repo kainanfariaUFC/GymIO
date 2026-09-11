@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { listCompletions, logCompletion } from "@/lib/workout-log.functions";
 
 const DEVICE_KEY = "treino:device-id";
 
@@ -27,15 +27,10 @@ export type Completion = {
 export async function fetchCompletions(workoutId?: string): Promise<Completion[]> {
   const deviceId = getDeviceId();
   if (!deviceId) return [];
-  let query = supabase
-    .from("workout_completions")
-    .select("day_slug, completed_on, workout_id, status")
-    .order("completed_on", { ascending: false })
-    .limit(120);
-  if (workoutId) query = query.eq("workout_id", workoutId);
-  const { data, error } = await query;
-  if (error) throw error;
-  return (data ?? []).map((row) => ({
+  const rows = await listCompletions({
+    data: { deviceId, ...(workoutId ? { workoutId } : {}) },
+  });
+  return (rows ?? []).map((row) => ({
     ...row,
     status: row.status === "incomplete" ? "incomplete" : "complete",
   }));
@@ -47,14 +42,9 @@ export async function finishWorkout(
   status: Completion["status"],
 ): Promise<Completion> {
   const deviceId = getDeviceId();
-  const row = {
-    device_id: deviceId,
-    day_slug: daySlug,
-    workout_id: workoutId,
-    completed_on: todayKey(),
-    status,
-  };
-  const { error } = await supabase.from("workout_completions").insert(row);
-  if (error && error.code !== "23505") throw error;
-  return { ...row };
+  const completedOn = todayKey();
+  await logCompletion({
+    data: { deviceId, daySlug, workoutId, completedOn, status },
+  });
+  return { day_slug: daySlug, workout_id: workoutId, completed_on: completedOn, status };
 }

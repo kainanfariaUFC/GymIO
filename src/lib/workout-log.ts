@@ -27,13 +27,17 @@ export type Completion = {
 export async function fetchCompletions(workoutId?: string): Promise<Completion[]> {
   const deviceId = getDeviceId();
   if (!deviceId) return [];
-  const rows = await listCompletions({
+  const rows = (await listCompletions({
     data: { deviceId, ...(workoutId ? { workoutId } : {}) },
+  })) as unknown as Array<Completion>;
+  return (rows ?? []).map((row) => {
+    return {
+      day_slug: row.day_slug,
+      completed_on: row.completed_on,
+      workout_id: row.workout_id,
+      status: row.status === "incomplete" ? "incomplete" : "complete",
+    };
   });
-  return (rows ?? []).map((row) => ({
-    ...row,
-    status: row.status === "incomplete" ? "incomplete" : "complete",
-  }));
 }
 
 export async function finishWorkout(
@@ -43,13 +47,8 @@ export async function finishWorkout(
 ): Promise<Completion> {
   const deviceId = getDeviceId();
   const completedOn = todayKey();
-  await logCompletion({
+  const completion = (await logCompletion({
     data: { deviceId, daySlug, workoutId, completedOn, status },
-  });
-  const rows = await fetchCompletions(workoutId);
-  const completion = rows.find(
-    (row) => row.day_slug === daySlug && row.completed_on === completedOn,
-  );
-  if (!completion) throw new Error("Não foi possível confirmar o registro do treino.");
+  })) as Completion;
   return completion;
 }

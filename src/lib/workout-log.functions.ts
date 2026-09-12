@@ -62,5 +62,17 @@ export const logCompletion = createServerFn({ method: "POST" })
       console.error("[workout-log] insert failed", error);
       throw new Error("Não foi possível registrar o treino.");
     }
-    return { ok: true };
+    const { data: completion, error: completionError } = await supabaseAdmin
+      .from("workout_completions")
+      .select("day_slug, completed_on, workout_id, status")
+      .eq("device_id", data.deviceId)
+      .eq("workout_id", data.workoutId)
+      .eq("day_slug", data.daySlug)
+      .eq("completed_on", data.completedOn)
+      .maybeSingle();
+    if (completionError || !completion) {
+      console.error("[workout-log] completion verification failed", completionError);
+      throw new Error("Não foi possível confirmar o registro do treino.");
+    }
+    return completion;
   });

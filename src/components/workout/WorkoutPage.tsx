@@ -221,7 +221,7 @@ export function WorkoutPage({ day, alunoNome, workoutId }: { day: WorkoutDay; al
       const status = doneTotal === allExercises.length ? "complete" : "incomplete";
       const row = await finishWorkout(day.slug, workoutId, status);
       setCompletions((prev) =>
-        prev.some((c) => c.completed_on === row.completed_on) ? prev : [row, ...prev],
+        [row, ...prev.filter((c) => c.completed_on !== row.completed_on)],
       );
       setJustFinished(true);
     } catch {

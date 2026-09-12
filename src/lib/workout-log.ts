@@ -46,5 +46,10 @@ export async function finishWorkout(
   await logCompletion({
     data: { deviceId, daySlug, workoutId, completedOn, status },
   });
-  return { day_slug: daySlug, workout_id: workoutId, completed_on: completedOn, status };
+  const rows = await fetchCompletions(workoutId);
+  const completion = rows.find(
+    (row) => row.day_slug === daySlug && row.completed_on === completedOn,
+  );
+  if (!completion) throw new Error("Não foi possível confirmar o registro do treino.");
+  return completion;
 }

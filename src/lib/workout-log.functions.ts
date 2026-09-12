@@ -51,30 +51,22 @@ export const logCompletion = createServerFn({ method: "POST" })
     }
     if (!workout) throw new Error("Treino não encontrado.");
 
-    const { error } = await supabaseAdmin.from("workout_completions").insert({
-      device_id: data.deviceId,
-      day_slug: data.daySlug,
-      workout_id: data.workoutId,
-      completed_on: data.completedOn,
-      status: data.status,
-    });
+    const { data: insertedCompletion, error } = await supabaseAdmin
+      .from("workout_completions")
+      .insert({
+        device_id: data.deviceId,
+        day_slug: data.daySlug,
+        workout_id: data.workoutId,
+        completed_on: data.completedOn,
+        status: data.status,
+      })
+      .select("id, day_slug, completed_on, workout_id, status")
+      .maybeSingle();
     if (error && error.code !== "23505") {
       console.error("[workout-log] insert failed", error);
       throw new Error("Não foi possível registrar o treino.");
     }
-    const { data: completion, error: completionError } = await supabaseAdmin
-      .from("workout_completions")
-      .select("id, day_slug, completed_on, workout_id, status")
-      .eq("device_id", data.deviceId)
-      .eq("workout_id", data.workoutId)
-      .eq("day_slug", data.daySlug)
-      .eq("completed_on", data.completedOn)
-      .maybeSingle();
-    if (completionError) {
-      console.error("[workout-log] completion verification failed", completionError);
-      throw new Error("Não foi possível confirmar o registro do treino.");
-    }
-    if (completion) return completion;
+    if (insertedCompletion) return insertedCompletion;
 
     if (error?.code === "23505") {
       const { data: legacyCompletion, error: legacyError } = await supabaseAdmin
